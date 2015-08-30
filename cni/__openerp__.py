@@ -37,7 +37,10 @@ Main Features
 """,
     'depends' : ['base','purchase','project','asset'],
     'data' : [
+        'security/cni_security.xml',
+        'security/ir.model.access.csv',
         'wizard/wizard_reserve_tool.xml',
+        'wizard/cni_wizard_import_project_data.xml',
         'cni_view.xml',
         'cni_menu.xml',
        ],

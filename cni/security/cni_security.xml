@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data noupdate="0">
+
+	<!-- CNI Groups  -->
+    <record id="group_cni_admin" model="res.groups">
+        <field name="name">CNI Admin</field>
+    </record>    
+   
+</data>
+</openerp>
