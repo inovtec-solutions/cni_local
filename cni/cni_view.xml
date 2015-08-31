@@ -122,8 +122,8 @@
 	        </header>
 	        
 			<sheet string="Material Sale Process">
-	        	<h2><p>Daily Sale</p></h2>
-				<p style = "color:blue;">Initiate your daily consubale sale process. Material should be reconcile on same form,</p>
+	        	<h2><p>Daily Consumable Items</p></h2>
+				<p style = "color:blue;">Initiate your daily consumable items process. Material should be reconcile on same form,</p>
 	            <group>
 				
 				<group attrs="{'readonly':[('state','!=','Draft')]}">
@@ -172,7 +172,7 @@
     </record>
 
 	<record id="action_daily_sale_reconcile" model="ir.actions.act_window">
-	    <field name="name">Daily Sale Reconcile</field>
+	    <field name="name">Daily Consumable Items Reconcile</field>
 	    <field name="res_model">daily.sale.reconciliation</field>
 	    <field name="view_type">form</field>
 		<field name="view_mode">tree,form</field>

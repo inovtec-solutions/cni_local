@@ -278,7 +278,7 @@ class sale_reconcile_lines(osv.osv):
         'name': fields.many2one('product.product', 'Product'),      
         'dispatch_qty': fields.float('Dispatched', required=True),
         'returned_qty': fields.float('Returned'),
-        'net_qty': fields.float('Sold Out', readonly=True),
+        'net_qty': fields.float('Used', readonly=True),
         'dispatch_id': fields.many2one('daily.sale.reconciliation','Sale Reconciliation'),
         'price_unit': fields.float('Unit Price'),
         'total':fields.float('Total'),
