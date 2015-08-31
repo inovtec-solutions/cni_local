@@ -14,6 +14,8 @@
 	<menuitem name="Client Stock" parent="menu_cni_root" id="menu_client_stock_heading" sequence="2" groups="group_cni_admin"/>
 	<menuitem action="action_get_client_product" parent="menu_client_stock_heading" id="menu_client_stock" groups="group_cni_admin"/>
 
+	<!--Project-->
+	<menuitem action="action_project_view2_view" parent="project.menu_project_management" id="menu_project_view2" groups="group_cni_admin"/>
 	<menuitem id="menu_cni_import_project_data_wizard" parent="project.menu_project_management" sequence="" groups="group_cni_admin" action="action_import_project_data"/>
 	
 
