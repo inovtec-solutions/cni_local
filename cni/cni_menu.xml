@@ -16,5 +16,6 @@
 
 	<menuitem id="menu_cni_import_project_data_wizard" parent="project.menu_project_management" sequence="" groups="group_cni_admin" action="action_import_project_data"/>
 	
+
 </data>
 </openerp>

@@ -25,6 +25,7 @@
 			<header>
 	            <button name="send_request" string="Send" type="object" states="Draft" class="oe_highlight" groups="base.group_user"/>
 	            <button name="approve_request" string="Approve" type="object" states="Open" groups="base.group_user"/>
+				<button name="return_asset" string="Reutrn Tool" confirm = "Are you sure tool is returned back by employee?" type="object" states="Approved" groups="base.group_user"/>
 				<button name="cancelled_request" string="Cancel" type="object" states="Draft,Open," groups="base.group_user"/>
 	        	<field name="state" widget="statusbar" statusbar_visible=",Draft,Open,Close,Cancel" statusbar_colors='{"Cancel":"red"}' readonly="1"/>
 	    	</header>
@@ -212,13 +213,13 @@
 			<sheet string="Project Types">
 	            <group>
 	                <group>
-	                    <field name="name" />
+	                    <field name="name" invisible ="1" />
 						<field name="project_types" />
 	                </group>
 	            </group>
 	            <notebook>
-	                <page string="Types" >
-	                	<field name="project_types"/>
+	                <page string="MileStones" >
+	                	<field name="project_stages_ids"/>
 	                </page>
 	            </notebook>
 	    	</sheet>
@@ -235,6 +236,55 @@
 	    </tree>
 	    </field>
 	</record>
+
+<!--Project Stages-->
+
+<record id="project_stage_form" model="ir.ui.view">
+		<field name="name">project.stages.form</field>
+	    <field name="model">project.stages</field>
+	    <field name="arch" type="xml">
+		<form string="Project Milestones">
+			<sheet string="MileStones">
+	            <group>
+	                <group>
+	                    <field name="name" invisible ="1" />
+						<field name="project_stage" readonly = "1" />
+	                </group>
+	            </group>
+	            <notebook>
+	                <page string="Miletstone Tasks" >
+	                	<field name="stage_task_ids"/>
+	                </page>
+	            </notebook>
+	    	</sheet>
+		</form>
+	    </field>
+    </record>
+
+<record id="project_stages_tree" model="ir.ui.view">
+		<field name="name">project.stages.tree</field>
+	    <field name="model">project.stages</field>
+	    <field name="arch" type="xml">
+	    <tree string="Project Stages">
+	        <field name="project_stage"/>
+	    </tree>
+	    </field>
+	</record>
+
+
+<!--Stage Tasks-->
+<record id="project_stages_tasks_tree" model="ir.ui.view">
+		<field name="name">project.stage.task.tree</field>
+	    <field name="model">project.stage.task</field>
+	    <field name="arch" type="xml">
+	    <tree editable = "bottom" string="Task">
+	        <field name="task"/>
+	    </tree>
+	    </field>
+	</record>
+
+
+
 
 <!--Clinet stock provision-->
 
@@ -338,7 +388,28 @@
 		    </field>
 		</record>
 
-	<!--Project inherited-->
+<!--Tree view for utility based project materials-->
+			
+
+<record id="view_project_material_tree" model="ir.ui.view">
+			<field name="name">project.material.tree</field>
+		    <field name="model">project.material</field>
+		    <field name="arch" type="xml">
+		    <tree editable = "bottom" string="Tools Reservation">
+		        <field name="mat_desc"/>
+				 <field name="req_quantiity"/>
+		        <field name="shiping_date"/>
+				 <field name="material_req_date"/>
+		        <field name="delivery_pa"/>
+				<field name="delivery_date"/>
+				 <field name="pa_gi_doc"/>
+		        <field name="gi_date"/>
+				 <field name="remarls"/>
+		    </tree>
+		    </field>
+		</record>
+
+<!--Project inherited-->
 
 		<record model="ir.ui.view" id="inherit_project_form">
 		      <field name="name">project.inherit</field>
@@ -349,7 +420,9 @@
 		      <field name="name" position="after">
 			  	</field>
 				<notebook>
+					
 					<page string = "Stockable">
+					<field name="project_types" required="1"/>
 					<field name="stockable" readonly="1"/>
 			    	</page>
 					<page string = "Material">
@@ -358,11 +431,57 @@
 					<page string = "Tools">
 					<field name="tools_used" readonly="1"/>
 			    	</page>
+					<page string = "Material PA">
+					<field name="material_ids" />
+			    	</page>
 			   </notebook>
 		      </field>
 		    </record>
 	
-<!--END Project-->
+	<record id="view_project_view2_tree" model="ir.ui.view">
+		<field name="name">project.project.tree</field>
+	    <field name="model">project.project</field>
+	    <field name="arch" type="xml">
+	    <tree  string="Pre Assembly">
+	        <field name="primevera_id"/>
+	        <field name="actv_desc"/>
+			 <field name="wbs"/>
+	        <field name="delivery_pa"/>
+			 <field name="site_code"/>
+	        <field name="status"/>
+			
+	    </tree>
+	    </field>
+	</record>
+ <record id="action_project_view2_view" model="ir.actions.act_window">
+	    <field name="name">Pre Assembly</field>
+	    <field name="res_model">project.project</field>
+	    <field name="view_type">form</field>
+		<field name="view_id" ref="view_project_view2_tree"/>
+		<field name="view_mode">tree,form</field>
+	   	
+	</record>
+ <!--Project_project View2 END-->
+
+
+<!--Company inherited-->
+<record model="ir.ui.view" id="inherit_res_company_form">
+		      <field name="name">res.company.inherit</field>
+		      <field name="model">res.company</field>
+		      <field name="inherit_id" ref="base.view_company_form"/>
+		      <field name="type">form</field>
+		      <field name="arch" type="xml">
+		      <field name="rml_header3" position="after">
+			  	</field>
+				<notebook>
+					<page string = "Project Types">
+					<field name="project_types_ids"/>
+			    	</page>
+			   </notebook>
+		      </field>
+		    </record>
+
+
 <!--Employee inherited-->
 
 		<record model="ir.ui.view" id="inherit_employee_form">

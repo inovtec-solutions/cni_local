@@ -15,7 +15,8 @@ class product_template(osv.osv):
 class asset_requisition(osv.osv):
     
     def send_request(self, cr, uid, ids, context=None):
-        self.write(cr, uid, ids, {'state':'Open'})
+        tr_no = self.set_transaction_no(cr, uid, ids)
+        self.write(cr, uid, ids, {'state':'Open','transaction_no':tr_no})
         return
     
     def _get_asset_state(self, cr, uid, team, internal_state):
@@ -28,21 +29,45 @@ class asset_requisition(osv.osv):
             return False
     
     def approve_request(self, cr, uid, ids, context=None):
-        self.write(cr, uid, ids[0], {'state':'Approved','aprroved_by':uid})
+        
         for f in self.browse(cr, uid, ids, context):
-            #update status in sales lines
+            #update 
             line_ids = self.pool.get('asset.requisition.lines').search(cr, uid, [('requisition_id','=',f.id)])
             if line_ids:
                 reconcile_rec = self.pool.get('asset.requisition.lines').browse(cr,uid,line_ids)
                 _logger.info("=reconcile_rec========================================== : %r", reconcile_rec)
                 for line in reconcile_rec:
                     #get wharhouse states
-                    wh_state =  self.pool.get('asset.state').search(cr, uid, [('team','=',1),('name','=','Isuyusued')])
+                    wh_state =  self.pool.get('asset.state').search(cr, uid, [('team','=',1),('name','=','Issued')])
                     if wh_state:
                         _logger.info("=wh_state========================================== : %r", wh_state[0])
                         self.pool.get('asset.asset').write(cr,uid,line.name.id,{
                                                    'warehouse_state_id':wh_state[0],
                                                    'user_id':f.employee.id})
+                        #if asset is updated, update asset requisition
+                        self.write(cr, uid, ids[0], {'state':'Approved','aprroved_by':uid})
+                    else:
+                        _logger.info("=No appropriate state found e.g Issued")
+        return
+        
+    def return_asset(self, cr, uid, ids, context=None):
+        
+        for f in self.browse(cr, uid, ids, context):
+            #update 
+            line_ids = self.pool.get('asset.requisition.lines').search(cr, uid, [('requisition_id','=',f.id)])
+            if line_ids:
+                reconcile_rec = self.pool.get('asset.requisition.lines').browse(cr,uid,line_ids)
+                _logger.info("=reconcile_rec========================================== : %r", reconcile_rec)
+                for line in reconcile_rec:
+                    #get wharhouse states
+                    wh_state =  self.pool.get('asset.state').search(cr, uid, [('team','=',1),('name','=','Available')])
+                    if wh_state:
+                        _logger.info("=wh_state========================================== : %r", wh_state[0])
+                        self.pool.get('asset.asset').write(cr,uid,line.name.id,{
+                                                   'warehouse_state_id':wh_state[0],
+                                                   'user_id':f.employee.id})
+                        #if asset is updated, update asset requisition
+                        self.write(cr, uid, ids[0], {'state':'Returned','returned_to':uid,'date_returned':datetime.date.today()})
                     else:
                         _logger.info("=No appropriate state found e.g Issued")
         return
@@ -54,10 +79,9 @@ class asset_requisition(osv.osv):
             result[f.id] = f.project.name + " (" + f.employee.name+")"
         return result
     
-    def set_transaction_no(self, cr, uid, ids, name, args, context=None):
-        result = {}
+    def set_transaction_no(self, cr, uid, ids):
         string = ""
-        for f in self.browse(cr, uid, ids, context=context):
+        for f in self.browse(cr, uid, ids):
             sql = """SELECT max(id) FROM asset_requisition WHERE state <> 'Draft'"""
             cr.execute(sql)
             numb = cr.fetchone()
@@ -67,8 +91,7 @@ class asset_requisition(osv.osv):
             else:
                 numb = 1    
             string  = "TR-"+str(numb)
-            result[f.id] = string
-        return result
+        return string
     
     def cancelled_request(self, cr, uid, ids, context=None):
         self.write(cr, uid, ids[0], {'state':'Cancel','aprroved_by':uid})
@@ -77,12 +100,13 @@ class asset_requisition(osv.osv):
     _name = "asset.requisition"
     _columns = {
         'name':fields.function(_set_name, method=True,  size=256, string='Code',type='char'),
-        'transaction_no':fields.function(set_transaction_no, method=True, store = True, string='No.',type='char',size = 256), 
+        'transaction_no':fields.char('No.',readonly = True,size = 50), 
         'project':  fields.many2one('project.project', 'Project', required=True, ondelete='restrict'),
         'employee':  fields.many2one('hr.employee', 'Required By', required=True, ondelete='restrict'),
         'date_requisted':  fields.date('Date ',required=True),
         'date_returned':  fields.date('Date Return',readonly=True),
         'aprroved_by':  fields.many2one('res.users', 'Approved By'),
+        'returned_to':  fields.many2one('res.users', 'Returned To'),
         'date_approved':  fields.date('Approved On'),
         'requisition_lines_ids': fields.one2many('asset.requisition.lines', 'requisition_id', 'Assets'),
         'note': fields.text('Any Note'),
@@ -90,6 +114,7 @@ class asset_requisition(osv.osv):
                                    ('Open','Waiting'),
                                    ('Approved','Approved'),
                                    ('Cancel', 'Cancel'),
+                                   ('Returned', 'Returned')
                                   ],
                                   'Status', required=True),
     }
@@ -381,35 +406,54 @@ client_stock_lines()
 class project_project(osv.osv):
     """Extended project.project through inheritance"""
     
-#    def create(self, cr, uid, vals, context=None, check=True):
-#        result = super(osv.osv, self).create(cr, uid, vals, context)
-#         Auto generate projecct tasks and stages
-#        stages = {'1':'Initilization','2':'Startup','3':'Testing'}
-#        return result
+    def create(self, cr, uid, vals, context=None, check=True):
+        result = super(osv.osv, self).create(cr, uid, vals, context)
+        # Auto generate projecct tasks and stages
+        stages = {'1':'Initilization','2':'Startup','3':'Testing'}
+        return result
     
     
     _name = 'project.project'
     _inherit ='project.project'
     _columns = {
     'partner_id': fields.many2one('res.partner', 'Client'),
+    'project_types':fields.selection([('Pre-Assembly', 'Pre-Assembly'),('Installation', 'Installation'),('General', 'General')], 'Project Types'),
     'consumable': fields.one2many('daily.sale.reconciliation', 'project', 'Consumable'),
     'stockable': fields.one2many('get.client.stock', 'project', 'Stockable'),
     'tools_used': fields.one2many('asset.requisition', 'project', 'Tools'),
+    'material_ids': fields.one2many('project.material', 'name', 'Material'),
     'project_id': fields.integer('Project ID'),
     'network': fields.char('Network', size=64),
-    'material_disk': fields.char('Material Disk', size=64),
-    'required_quantity': fields.integer('Req Quant'),
-    'shipping_date': fields.date('Shipping Date'),
-    'plant': fields.char('Plant', size=64),
-    'material_required_date': fields.date('Material Req Date'),
+    'primevera_id': fields.char('PrimaveraID', size=64),
+    'actv_desc': fields.char('Activity Desc', size=64),
+    'wbs': fields.char('WBS', size=64),
     'delivery_pa': fields.char('Delivery PA', size=64),
-    'delivery_date': fields.date('Delivery Date'),
-    'gi_date': fields.date('GI Date'),
-    'remarks': fields.char('Remarks', size=64),
+    'site_code': fields.date('Site Code'),
+    'status': fields.char('Status', size=64),
     }
     _defaults = {
     }
 project_project()
+
+class project_material(osv.osv):
+    """This object is created for projecdt utility. will work only for pre assembly project, populate data from csv file using import"""
+    _name = 'project.material'
+    _columns = {
+    'name': fields.many2one('project.project', 'Project'),
+    'mat_desc': fields.char('Matr Desc', size=64),
+    'req_quantiity':fields.integer('Required Quantity'),
+    'shiping_date': fields.date('Shipping Date'),
+    'material_req_date': fields.integer('Required Date'),
+    'delivery_pa': fields.char('Delivery PA', size=64),
+    'delivery_date': fields.date('Delivery Date'),
+    'pa_gi_doc': fields.char('PA-GI Document', size=64),
+    'gi_date': fields.char('Delivery PA', size=64),
+    'remarls': fields.char('Remarks', size=64),
+    }
+    _defaults = {
+    }
+project_material()
+
 
 #----------------------------------------------------------------------------------------------------------
 #-------------------------------------- inherited hr.employee-----------------------------------------------
@@ -468,13 +512,30 @@ class project_types(osv.osv):
     """This objects stores record of tools reserved by an employee"""
     _name = 'project.types'
     _columns = {
-    'name': fields.many2one('project.types', 'Types'),
-    'project_types':fields.selection([('TellUS', 'TellUS'),('Bell', 'Bell'),('General', 'General')], 'Project Types'),
+    'name': fields.many2one('res.company', 'Types', readonly = True),
+    'project_types':fields.selection([('Pre-Assembly', 'Pre-Assembly'),('Installation', 'Installation'),('General', 'General')], 'Project Types'),
+    'project_stages_ids': fields.one2many('project.stages', 'name', 'Project Stages'),
     }
 project_types()
 
+class project_stages(osv.osv):
+    """This objects stores record of tools reserved by an employee"""
+    _name = 'project.stages'
+    _columns = {
+    'name': fields.many2one('project.types', 'Types'),
+    'project_stage':fields.char('Stage',size = 150),
+    'stage_task_ids': fields.one2many('project.stage.task', 'name', 'Tasks'),
+    }
+project_stages()
 
-
+class project_stage_task(osv.osv):
+    """This object stores project stage tasks, task are associated with stages"""
+    _name = 'project.stage.task'
+    _columns = {
+    'name': fields.many2one('project.stages', 'Stage'),
+    'task':fields.char('Task',size = 150),
+    }
+project_stage_task()
 
 
 
