@@ -12,3 +12,5 @@
 "11","emp.tools.reservation","model_emp_tools_reservation","group_cni_admin",1,1,1,1
 "12","res.company","model_res_company","group_cni_admin",1,1,1,1
 "13","project.types","model_project_types","group_cni_admin",1,1,1,1
+"14","project.stages","model_project_stages","group_cni_admin",1,1,1,1
+"15","project.material","model_project_material","group_cni_admin",1,1,1,1
