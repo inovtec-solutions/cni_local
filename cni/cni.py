@@ -406,11 +406,11 @@ client_stock_lines()
 class project_project(osv.osv):
     """Extended project.project through inheritance"""
     
-    def create(self, cr, uid, vals, context=None, check=True):
-        result = super(osv.osv, self).create(cr, uid, vals, context)
-        # Auto generate projecct tasks and stages
-        stages = {'1':'Initilization','2':'Startup','3':'Testing'}
-        return result
+#    def create(self, cr, uid, vals, context=None, check=True):
+#        result = super(osv.osv, self).create(cr, uid, vals, context)
+#        # Auto generate projecct tasks and stages
+#        stages = {'1':'Initilization','2':'Startup','3':'Testing'}
+#        return result
     
     
     _name = 'project.project'

@@ -32,7 +32,7 @@ class cni_import_project_data(osv.osv_memory):
             project_exist = self.pool.get('project.project').search(cr, uid, [('network_id','=',worksheet.cell_value(row, 3)),('transaction_no','=',worksheet.cell_value(row, 3))])
             
             if project_exist:
-                self.pool.get('project.project').update(cr, uid, project_exist[0], {
+                self.pool.get('project.project').write(cr, uid, project_exist[0], {
                     'name': worksheet.cell_value(row, 3),
                     'gender': worksheet.cell_value(row, 5),
                     'father_nic': worksheet.cell_value(row, 8),
