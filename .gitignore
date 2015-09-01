@@ -53,7 +53,6 @@ l10n_uk/
 l10n_us/
 l10n_uy/
 l10n_ve/
-__init__.py
 account/
 account_accountant/
 account_analytic_analysis/
