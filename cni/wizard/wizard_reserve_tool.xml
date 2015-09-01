@@ -10,7 +10,7 @@
                     <group string="">
                         <newline/><field name="name"/>
                          <field name="from_date"/>
-                          <field name="from_date"/>
+                          <field name="to_date"/>
                           
                     </group>
                     <p>Reserve tools for your employee and get it issued when it becomes available</p>

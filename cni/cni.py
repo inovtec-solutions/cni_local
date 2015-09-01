@@ -406,11 +406,11 @@ client_stock_lines()
 class project_project(osv.osv):
     """Extended project.project through inheritance"""
     
-#    def create(self, cr, uid, vals, context=None, check=True):
-#        result = super(osv.osv, self).create(cr, uid, vals, context)
-#        # Auto generate projecct tasks and stages
-#        stages = {'1':'Initilization','2':'Startup','3':'Testing'}
-#        return result
+    def create(self, cr, uid, vals, context=None, check=True):
+        result = super(osv.osv, self).create(cr, uid, vals, context)
+        # Auto generate projecct tasks and stages
+        stages = {'1':'Initilization','2':'Startup','3':'Testing'}
+        return result
     
     
     _name = 'project.project'
@@ -424,14 +424,16 @@ class project_project(osv.osv):
     'material_ids': fields.one2many('project.material', 'name', 'Material'),
     'project_id': fields.integer('Project ID'),
     'network': fields.char('Network', size=64),
+    'priority': fields.char('Priority', size=64),
     'primevera_id': fields.char('PrimaveraID', size=64),
     'actv_desc': fields.char('Activity Desc', size=64),
     'wbs': fields.char('WBS', size=64),
-    'delivery_pa': fields.char('Delivery PA', size=64),
+    'delivery_pa': fields.integer('Delivery PA'),
     'site_code': fields.date('Site Code'),
     'status': fields.char('Status', size=64),
     }
     _defaults = {
+                 'project_types':'Pre-Assembly'
     }
 project_project()
 
