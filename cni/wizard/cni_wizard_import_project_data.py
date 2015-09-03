@@ -29,26 +29,41 @@ class cni_import_project_data(osv.osv_memory):
             print "rows: ", rows
             row += 1
             continue;
-            project_exist = self.pool.get('project.project').search(cr, uid, [('network_id','=',worksheet.cell_value(row, 3)),('transaction_no','=',worksheet.cell_value(row, 3))])
+            project_exist = self.pool.get('project.project').search(cr, uid, [('network','=',worksheet.cell_value(row, 4)),('transaction_no','=',worksheet.cell_value(row, 1))])
             
-            if project_exist:
-                self.pool.get('project.project').write(cr, uid, project_exist[0], {
-                    'name': worksheet.cell_value(row, 3),
-                    'gender': worksheet.cell_value(row, 5),
-                    'father_nic': worksheet.cell_value(row, 8),
-                    'phone': worksheet.cell_value(row, 9),
-                    'cell_no': worksheet.cell_value(row,10),
-                    'cur_city': 'Peshawar', 
-                    'fee_type': worksheet.cell_value(row, 20), }, context=context)
-            else:
-                self.pool.get('project.project').create(cr, uid, {
-                    'name': worksheet.cell_value(row, 3),
-                    'gender': worksheet.cell_value(row, 5),
-                    'father_nic': worksheet.cell_value(row, 8),
-                    'phone': worksheet.cell_value(row, 9),
-                    'cell_no': worksheet.cell_value(row,10),
-                    'cur_city': 'Peshawar', 
-                    'fee_type': worksheet.cell_value(row, 20), }, context=context)
+            if worksheet.cell_value(row, 31) == 'P-A':
+                if project_exist:
+                    project_id = project_exist[0]
+                else:
+                    project_id = self.pool.get('project.project').create(cr, uid, {
+                        'project_id': worksheet.cell_value(row, 2),
+                        'network': worksheet.cell_value(row, 4),
+                        'actv_desc': worksheet.cell_value(row, 6),
+                        'wbs': worksheet.cell_value(row,11),
+                        'delivery_pa': worksheet.cell_value(row, 63), }, context=context)            
+
+
+                material_exist = self.pool.get('project.material').search(cr, uid, [('name','=',project_id),('transaction_no','=',worksheet.cell_value(row, 1))])
+                if material_exist:
+                    material_id = material_exist[0]
+                    self.pool.get('project.material').write(cr, uid, material_id, {
+                        'material_req_date': worksheet.cell_value(row, 16),
+                        'mat_desc': worksheet.cell_value(row, 22),
+                        'req_quantiity': worksheet.cell_value(row,37),
+                        'shiping_date': worksheet.cell_value(row,46),
+                        'delivery_pa': worksheet.cell_value(row,63),
+                        'pa_gi_doc': worksheet.cell_value(row,67)}, context=context)
+                else:
+                    material_id = self.pool.get('project.material').create(cr, uid, {
+                        'name': material_id,
+                        'transaction_no': worksheet.cell_value(row, 1),
+                        'material_req_date': worksheet.cell_value(row, 16),
+                        'mat_desc': worksheet.cell_value(row, 22),
+                        'req_quantiity': worksheet.cell_value(row,37),
+                        'shiping_date': worksheet.cell_value(row,46),
+                        'delivery_pa': worksheet.cell_value(row,63),
+                        'pa_gi_doc': worksheet.cell_value(row,67)}, context=context)            
+
             row += 1
         return {}
 
