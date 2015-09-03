@@ -417,16 +417,18 @@
 		      <field name="inherit_id" ref="project.edit_project"/>
 		      <field name="type">form</field>
 		      <field name="arch" type="xml">
-				<group name="group_alias"  position="after">
+			<field name="name" position="after">
+			  	</field>	
+			<group >
 	                <group>
 						<field name="project_types" required="1"/>
 	                </group>
-	                <group attrs="{'readonly':[('project_types','!=','Pre-Assembly')]}">
+	                <group attrs="{'invisible':[('project_types','!=','Pre-Assembly')]}">
 						 <separator string="Pre Assembly" colspan="2"/>
-						 <field name="wbs"/>
-						<field name="project_id" />
+						 <field name="wbs" attrs="{'invisible':[('project_types','!=','Pre-Assembly')]}" />
+						<field name="project_id"  />
 	                </group>
-					 <group attrs="{'readonly':[('project_types','!=','Pre-Assembly')]}">
+					 <group attrs="{'invisible':[('project_types','!=','Pre-Assembly')]}">
 						
 						<field name="actv_desc"  />
 						<field name="network" />
@@ -435,7 +437,7 @@
 	                </group>
 				</group>
 					<notebook>
-					<page string = "Stockable">
+					<page string = "Task Summary">
 					<field name="project_types" required="1"/>
 					<field name="stockable" readonly="1"/>
 			    	</page>

@@ -9,7 +9,7 @@ class product_template(osv.osv):
     _inherit = "product.template"
     _columns = {
         'sku': fields.char('SKU', size=64, required=True),
-        'dimension': fields.char('Dimension', size=64, required=True),
+        'dimension': fields.char('Dimension', size=64),
     }
     
 class asset_requisition(osv.osv):
@@ -406,18 +406,11 @@ client_stock_lines()
 class project_project(osv.osv):
     """Extended project.project through inheritance"""
     
-    def create(self, cr, uid, vals, context=None, check=True):
-        result = super(osv.osv, self).create(cr, uid, vals, context)
-        # Auto generate projecct tasks and stages
-        stages = {'1':'Initilization','2':'Startup','3':'Testing'}
-        return result
-    
-    
     _name = 'project.project'
     _inherit ='project.project'
     _columns = {
     'partner_id': fields.many2one('res.partner', 'Client'),
-    'project_types':fields.selection([('Pre-Assembly', 'Pre-Assembly'),('Installation', 'Installation'),('General', 'General')], 'Project Types'),
+    'project_types':fields.selection([('Pre-Assembly', 'Pre-Assembly'),('Installation', 'Installation'),('General', 'General')], 'Project Type'),
     'consumable': fields.one2many('daily.sale.reconciliation', 'project', 'Consumable'),
     'stockable': fields.one2many('get.client.stock', 'project', 'Stockable'),
     'tools_used': fields.one2many('asset.requisition', 'project', 'Tools'),
@@ -433,7 +426,7 @@ class project_project(osv.osv):
     'status': fields.char('Status', size=64),
     }
     _defaults = {
-                 'project_types':'Pre-Assembly'
+                 'project_types':lambda *a:'General'
     }
 project_project()
 
@@ -455,6 +448,17 @@ class project_material(osv.osv):
     _defaults = {
     }
 project_material()
+
+class project_work(osv.osv):
+    """This object inherites project_task_work object ony one filed is change work summary of acutal module is change to task summary"""
+    _name = "project.task.work"
+    _description = "Project Task Work"
+    _inherit ='project.task.work'
+    _columns = {
+        'name': fields.char('Task Summary'),
+            }
+
+project_work()
 
 
 #----------------------------------------------------------------------------------------------------------
