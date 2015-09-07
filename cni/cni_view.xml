@@ -420,17 +420,18 @@
 			<field name="name" position="after">
 			  	</field>	
 			<group >
+			
 	                <group>
 						<field name="project_types" required="1"/>
 	                </group>
-	                <group attrs="{'invisible':[('project_types','!=','Pre-Assembly')]}">
-						 <separator string="Pre Assembly" colspan="2"/>
-						 <field name="wbs" attrs="{'invisible':[('project_types','!=','Pre-Assembly')]}" />
-						<field name="project_id"  />
+	                <group attrs="{'invisible':[('project_types','!=','Pre-Assembly')]}"  col="2" >
+						 <separator string="Pre Assembly" attrs="{'invisible':[('project_types','!=','Pre-Assembly')]}"/>
+						 <field name="wbs" />
+						<field name="project_id" />
 	                </group>
 					 <group attrs="{'invisible':[('project_types','!=','Pre-Assembly')]}">
 						
-						<field name="actv_desc"  />
+						<field name="actv_desc" />
 						<field name="network" />
 						<field name="delivery_pa" />
 						<field name="status" />
@@ -438,7 +439,6 @@
 				</group>
 					<notebook>
 					<page string = "Task Summary">
-					<field name="project_types" required="1"/>
 					<field name="stockable" readonly="1"/>
 			    	</page>
 					<page string = "Material">
@@ -447,7 +447,7 @@
 					<page string = "Tools">
 					<field name="tools_used" readonly="1"/>
 			    	</page>
-					<page string = "Material PA">
+					<page string = "Material PA" attrs="{'invisible':[('project_types','!=','Pre-Assembly')]}">
 					<field name="material_ids" />
 			    	</page>
 			   </notebook>

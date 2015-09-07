@@ -410,12 +410,13 @@ class project_project(osv.osv):
     _inherit ='project.project'
     _columns = {
     'partner_id': fields.many2one('res.partner', 'Client'),
-    'project_types':fields.selection([('Pre-Assembly', 'Pre-Assembly'),('Installation', 'Installation'),('General', 'General')], 'Project Type'),
+    'project_types':fields.selection([('Pre-Assembly', 'Pre-Assembly'),('General', 'General')], 'Project Type'),
     'consumable': fields.one2many('daily.sale.reconciliation', 'project', 'Consumable'),
     'stockable': fields.one2many('get.client.stock', 'project', 'Stockable'),
     'tools_used': fields.one2many('asset.requisition', 'project', 'Tools'),
     'material_ids': fields.one2many('project.material', 'name', 'Material'),
     'project_id': fields.integer('Project ID'),
+    'transaction_no': fields.integer('Transaction No'),
     'network': fields.char('Network', size=64),
     'priority': fields.char('Priority', size=64),
     'primevera_id': fields.char('PrimaveraID', size=64),

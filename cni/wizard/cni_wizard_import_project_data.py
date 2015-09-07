@@ -29,26 +29,32 @@ class cni_import_project_data(osv.osv_memory):
             print "rows: ", rows
             row += 1
             continue;
-            project_exist = self.pool.get('project.project').search(cr, uid, [('network_id','=',worksheet.cell_value(row, 3)),('transaction_no','=',worksheet.cell_value(row, 3))])
+            project_exist = self.pool.get('project.project').search(cr, uid, [('network','=',worksheet.cell_value(row, 3)),('transaction_no','=',worksheet.cell_value(row, 3))])
             
             if project_exist:
                 self.pool.get('project.project').write(cr, uid, project_exist[0], {
-                    'name': worksheet.cell_value(row, 3),
-                    'gender': worksheet.cell_value(row, 5),
-                    'father_nic': worksheet.cell_value(row, 8),
-                    'phone': worksheet.cell_value(row, 9),
-                    'cell_no': worksheet.cell_value(row,10),
-                    'cur_city': 'Peshawar', 
-                    'fee_type': worksheet.cell_value(row, 20), }, context=context)
+                    'network': worksheet.cell_value(row, 1),
+                    'priority': worksheet.cell_value(row, 1),
+                    'primevera_id': worksheet.cell_value(row, 2),
+                    'actv_desc': worksheet.cell_value(row, 3),
+                    'wbs': worksheet.cell_value(row, 4),
+                    'delivery_pa': worksheet.cell_value(row,5),
+                    'status': worksheet.cell_value(row,6),
+                    'site_code': worksheet.cell_value(row,7),
+                     }, context=context)
             else:
                 self.pool.get('project.project').create(cr, uid, {
-                    'name': worksheet.cell_value(row, 3),
-                    'gender': worksheet.cell_value(row, 5),
-                    'father_nic': worksheet.cell_value(row, 8),
-                    'phone': worksheet.cell_value(row, 9),
-                    'cell_no': worksheet.cell_value(row,10),
-                    'cur_city': 'Peshawar', 
-                    'fee_type': worksheet.cell_value(row, 20), }, context=context)
+                    'transaction_no': worksheet.cell_value(row, 1),
+                    'network': worksheet.cell_value(row, 2),
+                    'priority': worksheet.cell_value(row, 3),
+                    'primevera_id': worksheet.cell_value(row, 4),
+                    'actv_desc': worksheet.cell_value(row, 5),
+                    'wbs': worksheet.cell_value(row, 6),
+                    'delivery_pa': worksheet.cell_value(row,7),
+                    'status': worksheet.cell_value(row,6),
+                    'site_code': worksheet.cell_value(row,8),
+                    }, context=context)
+            
             row += 1
         return {}
 
