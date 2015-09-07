@@ -415,8 +415,8 @@ class project_project(osv.osv):
     'stockable': fields.one2many('get.client.stock', 'project', 'Stockable'),
     'tools_used': fields.one2many('asset.requisition', 'project', 'Tools'),
     'material_ids': fields.one2many('project.material', 'name', 'Material'),
-    'project_id': fields.integer('Project ID'),
     'transaction_no': fields.integer('Transaction No'),
+    'project_id': fields.char('Project ID', size=64),
     'network': fields.char('Network', size=64),
     'priority': fields.char('Priority', size=64),
     'primevera_id': fields.char('PrimaveraID', size=64),
@@ -436,10 +436,11 @@ class project_material(osv.osv):
     _name = 'project.material'
     _columns = {
     'name': fields.many2one('project.project', 'Project'),
+    'transaction_no': fields.integer('Transaction No.'),
     'mat_desc': fields.char('Matr Desc', size=64),
     'req_quantiity':fields.integer('Required Quantity'),
     'shiping_date': fields.date('Shipping Date'),
-    'material_req_date': fields.integer('Required Date'),
+    'material_req_date': fields.date('Required Date'),
     'delivery_pa': fields.char('Delivery PA', size=64),
     'delivery_date': fields.date('Delivery Date'),
     'pa_gi_doc': fields.char('PA-GI Document', size=64),
