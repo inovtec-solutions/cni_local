@@ -27,16 +27,12 @@ class cni_import_project_data(osv.osv_memory):
         while row <= rows:
             transaction_no = str(worksheet.cell_value(row, 1))
             project_id_excel = str(worksheet.cell_value(row, 2))
-             
-            _logger.info("Transaction No.: %r, Project ID: %r", transaction_no, project_id_excel)
+            project_id_excel = project_id_excel.strip()
             
-            try:
-                float(transaction_no) # for int, long and float
-            except ValueError:
+            if project_id_excel == "":
                 row += 1    
                 continue
             
-            _logger.info("___________________________%r", transaction_no)
             
             if worksheet.cell_value(row, 31) == 'P-A':
                 _logger.info("_______________P-A____________%r", worksheet.cell_value(row, 31))
@@ -45,7 +41,7 @@ class cni_import_project_data(osv.osv_memory):
                 project_exist = self.pool.get('project.project').search(cr, uid, [('project_id','=',project_id_excel)])
                 if project_exist:
                     project_id = project_exist[0]
-                    _logger.info("_______________if project____________%r", worksheet.cell_value(row, 31))
+                    _logger.info("_______________IF Project____________%r", project_id_excel)
             
                 else:
                     project_id = self.pool.get('project.project').create(cr, uid, {
@@ -57,8 +53,15 @@ class cni_import_project_data(osv.osv_memory):
                         'wbs': worksheet.cell_value(row,11),
                         'delivery_pa': worksheet.cell_value(row, 63), }, context=context)            
 
-
-                material_exist = self.pool.get('project.material').search(cr, uid, [('name','=',project_id),('transaction_no','=',worksheet.cell_value(row, 1))])
+                material_desc = str(('mat_desc','=',worksheet.cell_value(row, 22)))
+                material_desc = material_desc.strip()
+                
+                item = str(('mat_desc','=',worksheet.cell_value(row, 7)))
+                item = item.strip()
+                
+                _logger.info("_______________Material Description/ Item____________%r%r", material_desc,item)
+                 
+                material_exist = self.pool.get('project.material').search(cr, uid, [('name','=',project_id),('mat_desc','=',material_desc),('item','=',item)])
                 
                 shiping_date = str(worksheet.cell_value(row,46))
                 if shiping_date.strip() == "":
@@ -74,9 +77,9 @@ class cni_import_project_data(osv.osv_memory):
                     
                 if material_exist:
                     material_id = material_exist[0]
+                    _logger.info("_______________IF Material____________%r", material_id)
                     self.pool.get('project.material').write(cr, uid, material_id, {
                         'material_req_date': material_req_date,
-                        'mat_desc': worksheet.cell_value(row, 22),
                         'req_quantiity': worksheet.cell_value(row,37),
                         'shiping_date': shiping_date,
                         'delivery_pa': worksheet.cell_value(row,63),
@@ -86,6 +89,7 @@ class cni_import_project_data(osv.osv_memory):
                         'name': project_id,
                         'transaction_no': worksheet.cell_value(row, 1),
                         'material_req_date': material_req_date,
+                        'item': worksheet.cell_value(row, 7),
                         'mat_desc': worksheet.cell_value(row, 22),
                         'req_quantiity': worksheet.cell_value(row,37),
                         'shiping_date': shiping_date,

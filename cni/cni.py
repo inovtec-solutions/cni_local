@@ -438,6 +438,7 @@ class project_material(osv.osv):
     'name': fields.many2one('project.project', 'Project'),
     'transaction_no': fields.integer('Transaction No.'),
     'mat_desc': fields.char('Matr Desc', size=64),
+    'item': fields.char('Item', size=64),
     'req_quantiity':fields.integer('Required Quantity'),
     'shiping_date': fields.date('Shipping Date'),
     'material_req_date': fields.date('Required Date'),
