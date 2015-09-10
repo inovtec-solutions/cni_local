@@ -45,10 +45,11 @@ class cni_import_project_data(osv.osv_memory):
             
                 else:
                     project_id = self.pool.get('project.project').create(cr, uid, {
-                        'name': worksheet.cell_value(row, 9),
+                        'name': project_id_excel,
                         'project_types': 'Pre-Assembly',
-                        'project_id': worksheet.cell_value(row, 2),
+                        'project_id': project_id_excel,
                         'network': worksheet.cell_value(row, 4),
+                        'status': worksheet.cell_value(row, 10),
                         'actv_desc': worksheet.cell_value(row, 6),
                         'wbs': worksheet.cell_value(row,11),
                         'delivery_pa': worksheet.cell_value(row, 63), }, context=context)            

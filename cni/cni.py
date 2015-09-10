@@ -424,7 +424,7 @@ class project_project(osv.osv):
     'wbs': fields.char('WBS', size=64),
     'delivery_pa': fields.integer('Delivery PA'),
     'site_code': fields.date('Site Code'),
-    'status': fields.char('Status', size=64),
+    'status': fields.char('SC Status', size=64),
     }
     _defaults = {
                  'project_types':lambda *a:'General'
