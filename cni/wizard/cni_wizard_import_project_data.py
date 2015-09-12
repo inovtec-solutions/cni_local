@@ -56,6 +56,9 @@ class cni_import_project_data(osv.osv_memory):
                 material_desc = str(worksheet.cell_value(row, 22))
                 material_desc = material_desc.strip()
                 
+                network = str(worksheet.cell_value(row, 4))
+                network = network.strip()
+                        
                 item = str(worksheet.cell_value(row, 7))
                 item = item.strip()
                 
@@ -87,6 +90,7 @@ class cni_import_project_data(osv.osv_memory):
                 else:
                     self.pool.get('project.material').create(cr, uid, {
                         'name': project_id,
+                        'network': network,
                         'item': worksheet.cell_value(row, 7),
                         'material_req_date': material_req_date,
                         'mat_desc': worksheet.cell_value(row, 22),

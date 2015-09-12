@@ -396,8 +396,10 @@
 		    <field name="model">project.material</field>
 		    <field name="arch" type="xml">
 		    <tree editable = "bottom" string="Tools Reservation">
-		        <field name="mat_desc"/>
-				 <field name="req_quantiity"/>
+		        <field name="network"/>
+				<field name="item"/>
+				<field name="mat_desc"/>
+				<field name="req_quantiity"/>
 		        <field name="shiping_date"/>
 				 <field name="material_req_date"/>
 		        <field name="delivery_pa"/>
