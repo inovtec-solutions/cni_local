@@ -25,7 +25,6 @@ class cni_import_project_data(osv.osv_memory):
         row = 7
             
         while row <= rows:
-            transaction_no = str(worksheet.cell_value(row, 1))
             project_id_excel = str(worksheet.cell_value(row, 2))
             project_id_excel = project_id_excel.strip()
             
@@ -54,10 +53,10 @@ class cni_import_project_data(osv.osv_memory):
                         'wbs': worksheet.cell_value(row,11),
                         'delivery_pa': worksheet.cell_value(row, 63), }, context=context)            
 
-                material_desc = str(('mat_desc','=',worksheet.cell_value(row, 22)))
+                material_desc = str(worksheet.cell_value(row, 22))
                 material_desc = material_desc.strip()
                 
-                item = str(('mat_desc','=',worksheet.cell_value(row, 7)))
+                item = str(worksheet.cell_value(row, 7))
                 item = item.strip()
                 
                 _logger.info("_______________Material Description/ Item____________%r%r", material_desc,item)
@@ -88,9 +87,8 @@ class cni_import_project_data(osv.osv_memory):
                 else:
                     self.pool.get('project.material').create(cr, uid, {
                         'name': project_id,
-                        'transaction_no': worksheet.cell_value(row, 1),
-                        'material_req_date': material_req_date,
                         'item': worksheet.cell_value(row, 7),
+                        'material_req_date': material_req_date,
                         'mat_desc': worksheet.cell_value(row, 22),
                         'req_quantiity': worksheet.cell_value(row,37),
                         'shiping_date': shiping_date,
