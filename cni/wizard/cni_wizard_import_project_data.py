@@ -28,15 +28,15 @@ class cni_import_project_data(osv.osv_memory):
             project_id_excel = str(worksheet.cell_value(row, 2))
             project_id_excel = project_id_excel.strip()
             
+            _logger.info("___________________________Row No: %r", row)
+            
             if project_id_excel == "":
                 row += 1    
                 continue
             
             
             if worksheet.cell_value(row, 31) == 'P-A':
-                _logger.info("_______________P-A____________%r", worksheet.cell_value(row, 31))
-            
-            
+                
                 project_exist = self.pool.get('project.project').search(cr, uid, [('project_id','=',project_id_excel)])
                 if project_exist:
                     project_id = project_exist[0]
