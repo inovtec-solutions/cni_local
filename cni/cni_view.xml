@@ -396,14 +396,15 @@
 		    <field name="model">project.material</field>
 		    <field name="arch" type="xml">
 		    <tree editable = "bottom" string="Tools Reservation">
-		        <field name="mat_desc"/>
-				 <field name="req_quantiity"/>
-		        <field name="shiping_date"/>
-				 <field name="material_req_date"/>
-		        <field name="delivery_pa"/>
-				<field name="delivery_date"/>
-				 <field name="pa_gi_doc"/>
-		        <field name="gi_date"/>
+		        <field name="mat_desc" readonly = "1"/>
+				 <field name="req_quantiity" readonly = "1" />
+		        <field name="shiping_date" readonly = "1"/>
+				 <field name="material_req_date" readonly = "1"/>
+		        <field name="delivery_pa" readonly = "1"/>
+				<field name="delivery_date" readonly = "1"/>
+				 <field name="pa_gi_doc" readonly = "1"/>
+		        <field name="gi_date" readonly = "1"/>
+				<field name="po_pa" readonly = "1"/>
 				 <field name="remarls"/>
 		    </tree>
 		    </field>
@@ -421,24 +422,19 @@
 			  	</field>	
 			<group >
 			
-	                <group>
-						<field name="project_types" required="1"/>
+					<group>
+						<field name="project_types" required="1" on_change="onchange_projecttype(project_types)" />
 	                </group>
-	                <group attrs="{'invisible':[('project_types','!=','Pre-Assembly')]}"  col="2" >
-						 <separator string="Pre Assembly" attrs="{'invisible':[('project_types','!=','Pre-Assembly')]}"/>
+	                <group string="Pre Assembly" attrs="{'invisible':[('project_types','!=','Pre-Assembly')]}" >
 						 <field name="wbs" />
 						<field name="project_id" />
-	                </group>
-					 <group attrs="{'invisible':[('project_types','!=','Pre-Assembly')]}">
-						
 						<field name="actv_desc" />
-						<field name="network" />
-						<field name="delivery_pa" />
 						<field name="status" />
 	                </group>
+					 
 				</group>
 					<notebook>
-					<page string = "Task Summary">
+					<page string = "Stockables">
 					<field name="stockable" readonly="1"/>
 			    	</page>
 					<page string = "Material">
@@ -454,6 +450,18 @@
 		      </field>
 		    </record>
 
+<!--Project inherited for projectmanager invisibly on slection-->
+<record model="ir.ui.view" id="inherit_project_form2">
+		      <field name="name">project.inherit</field>
+		      <field name="model">project.project</field>
+		      <field name="inherit_id" ref="project.edit_project"/>
+		      <field name="type">form</field>
+		      <field name="arch" type="xml">
+			<field name="user_id" attrs="{'invisible':[('project_types','=','Pre-Assembly')]}" position="replace">
+			  	</field>	
+			  </field>
+		    </record>
+
 	<record id="view_project_view2_tree" model="ir.ui.view">
 		<field name="name">project.project.tree</field>
 	    <field name="model">project.project</field>
@@ -462,7 +470,6 @@
 	        <field name="primevera_id"/>
 	        <field name="actv_desc"/>
 			 <field name="wbs"/>
-	        <field name="delivery_pa"/>
 			 <field name="site_code"/>
 	        <field name="status"/>
 			
@@ -480,6 +487,8 @@
  <!--Project_project View2 END-->
 
 
+
+
 <!--Company inherited-->
 <record model="ir.ui.view" id="inherit_res_company_form">
 		      <field name="name">res.company.inherit</field>
@@ -487,7 +496,7 @@
 		      <field name="inherit_id" ref="base.view_company_form"/>
 		      <field name="type">form</field>
 		      <field name="arch" type="xml">
-		      <field name="rml_header3" position="after">
+		      <field name="rml_header3">
 			  	</field>
 				<notebook>
 					<page string = "Project Types">

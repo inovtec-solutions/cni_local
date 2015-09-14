@@ -406,6 +406,16 @@ client_stock_lines()
 class project_project(osv.osv):
     """Extended project.project through inheritance"""
     
+    def onchange_projecttype(self, cr, uid, ids,type):
+        vals = {}
+        if type=='Pre-Assembly':
+            partner = self.pool.get('res.partner').search(cr, uid, [('name','=','BELL'),])
+            if partner:
+                vals['partner_id'] = partner[0]
+            return { 'value':vals  }
+        else:
+            return {} 
+    
     _name = 'project.project'
     _inherit ='project.project'
     _columns = {
@@ -417,12 +427,10 @@ class project_project(osv.osv):
     'material_ids': fields.one2many('project.material', 'name', 'Material'),
     'transaction_no': fields.integer('Transaction No'),
     'project_id': fields.char('Project ID', size=64),
-    'network': fields.char('Network', size=64),
     'priority': fields.char('Priority', size=64),
     'primevera_id': fields.char('PrimaveraID', size=64),
     'actv_desc': fields.char('Activity Desc', size=64),
     'wbs': fields.char('WBS', size=64),
-    'delivery_pa': fields.integer('Delivery PA'),
     'site_code': fields.date('Site Code'),
     'status': fields.char('Status', size=64),
     }
@@ -436,15 +444,18 @@ class project_material(osv.osv):
     _name = 'project.material'
     _columns = {
     'name': fields.many2one('project.project', 'Project'),
+    'network': fields.char('Network(E)', size=64),
+    'item': fields.char('Item(H)', size=64),
     'transaction_no': fields.integer('Transaction No.'),
-    'mat_desc': fields.char('Matr Desc', size=64),
-    'req_quantiity':fields.integer('Required Quantity'),
-    'shiping_date': fields.date('Shipping Date'),
-    'material_req_date': fields.date('Required Date'),
-    'delivery_pa': fields.char('Delivery PA', size=64),
-    'delivery_date': fields.date('Delivery Date'),
-    'pa_gi_doc': fields.char('PA-GI Document', size=64),
-    'gi_date': fields.char('Delivery PA', size=64),
+    'mat_desc': fields.char('Matr Desc(W)', size=64),
+    'req_quantiity':fields.integer('Required MtQuantity(AL)'),
+    'shiping_date': fields.date('Shipping Date(R)'),
+    'material_req_date': fields.date('Required MtDate(Q)'),
+    'delivery_pa': fields.char('Delivery PA#(BL)', size=64),
+    'delivery_date': fields.date('Delivery PA Date(BO)'),
+    'pa_gi_doc': fields.char('PA-GI Document(BP)', size=64),
+    'gi_date': fields.char('PA GI Date(BQ)', size=64),
+    'po_pa': fields.char('PO(P-A)#(BS)', size=64),
     'remarls': fields.char('Remarks', size=64),
     }
     _defaults = {

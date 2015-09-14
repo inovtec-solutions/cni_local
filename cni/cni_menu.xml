@@ -16,7 +16,7 @@
 
 	<!--Project-->
 	<!--<menuitem action="action_project_view2_view" parent="project.menu_project_management" id="menu_project_view2" groups="group_cni_admin"/>-->
-	<menuitem id="menu_cni_import_project_data_wizard" parent="project.menu_project_management" sequence="" groups="group_cni_admin" action="action_import_project_data"/>
+	<menuitem id="menu_cni_import_project_data_wizard" parent="project.menu_project_management" sequence="" groups="group_cni_admin,group_import_project_data" action="action_import_project_data"/>
 	<menuitem action="project.action_view_task" id="project.menu_action_view_task" parent="project.menu_project_management" name="Project Miletones" sequence="5" groups="group_cni_admin"/>
 
 </data>

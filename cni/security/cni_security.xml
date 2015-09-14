@@ -5,6 +5,10 @@
 	<!-- CNI Groups  -->
     <record id="group_cni_admin" model="res.groups">
         <field name="name">CNI Admin</field>
+    </record> 
+
+	<record id="group_import_project_data" model="res.groups">
+        <field name="name">Utility Manager</field>
     </record>    
    
 </data>
