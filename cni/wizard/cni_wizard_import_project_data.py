@@ -25,40 +25,46 @@ class cni_import_project_data(osv.osv_memory):
         row = 7
             
         while row <= rows:
-            transaction_no = str(worksheet.cell_value(row, 1))
             project_id_excel = str(worksheet.cell_value(row, 2))
-             
-            _logger.info("Transaction No.: %r, Project ID: %r", transaction_no, project_id_excel)
+            project_id_excel = project_id_excel.strip()
             
-            try:
-                float(transaction_no) # for int, long and float
-            except ValueError:
+            _logger.info("___________________________Row No: %r", row)
+            
+            if project_id_excel == "":
                 row += 1    
                 continue
             
-            _logger.info("___________________________%r", transaction_no)
             
             if worksheet.cell_value(row, 31) == 'P-A':
-                _logger.info("_______________P-A____________%r", worksheet.cell_value(row, 31))
-            
-            
+                
                 project_exist = self.pool.get('project.project').search(cr, uid, [('project_id','=',project_id_excel)])
                 if project_exist:
                     project_id = project_exist[0]
-                    _logger.info("_______________if project____________%r", worksheet.cell_value(row, 31))
+                    _logger.info("_______________IF Project____________%r", project_id_excel)
             
                 else:
                     project_id = self.pool.get('project.project').create(cr, uid, {
-                        'name': worksheet.cell_value(row, 9),
+                        'name': project_id_excel,
                         'project_types': 'Pre-Assembly',
-                        'project_id': worksheet.cell_value(row, 2),
+                        'project_id': project_id_excel,
                         'network': worksheet.cell_value(row, 4),
+                        'status': worksheet.cell_value(row, 10),
                         'actv_desc': worksheet.cell_value(row, 6),
                         'wbs': worksheet.cell_value(row,11),
                         'delivery_pa': worksheet.cell_value(row, 63), }, context=context)            
 
-
-                material_exist = self.pool.get('project.material').search(cr, uid, [('name','=',project_id),('transaction_no','=',worksheet.cell_value(row, 1))])
+                material_desc = str(worksheet.cell_value(row, 22))
+                material_desc = material_desc.strip()
+                
+                network = str(worksheet.cell_value(row, 4))
+                network = network.strip()
+                        
+                item = str(worksheet.cell_value(row, 7))
+                item = item.strip()
+                
+                _logger.info("_______________Material Description/ Item____________%r%r", material_desc,item)
+                 
+                material_exist = self.pool.get('project.material').search(cr, uid, [('name','=',project_id),('mat_desc','=',material_desc),('item','=',item)])
                 
                 shiping_date = str(worksheet.cell_value(row,46))
                 if shiping_date.strip() == "":
@@ -74,9 +80,9 @@ class cni_import_project_data(osv.osv_memory):
                     
                 if material_exist:
                     material_id = material_exist[0]
+                    _logger.info("_______________IF Material____________%r", material_id)
                     self.pool.get('project.material').write(cr, uid, material_id, {
                         'material_req_date': material_req_date,
-                        'mat_desc': worksheet.cell_value(row, 22),
                         'req_quantiity': worksheet.cell_value(row,37),
                         'shiping_date': shiping_date,
                         'delivery_pa': worksheet.cell_value(row,63),
@@ -84,7 +90,8 @@ class cni_import_project_data(osv.osv_memory):
                 else:
                     self.pool.get('project.material').create(cr, uid, {
                         'name': project_id,
-                        'transaction_no': worksheet.cell_value(row, 1),
+                        'network': network,
+                        'item': worksheet.cell_value(row, 7),
                         'material_req_date': material_req_date,
                         'mat_desc': worksheet.cell_value(row, 22),
                         'req_quantiity': worksheet.cell_value(row,37),

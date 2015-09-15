@@ -425,14 +425,13 @@ class project_project(osv.osv):
     'stockable': fields.one2many('get.client.stock', 'project', 'Stockable'),
     'tools_used': fields.one2many('asset.requisition', 'project', 'Tools'),
     'material_ids': fields.one2many('project.material', 'name', 'Material'),
-    'transaction_no': fields.integer('Transaction No'),
     'project_id': fields.char('Project ID', size=64),
     'priority': fields.char('Priority', size=64),
     'primevera_id': fields.char('PrimaveraID', size=64),
     'actv_desc': fields.char('Activity Desc', size=64),
     'wbs': fields.char('WBS', size=64),
     'site_code': fields.date('Site Code'),
-    'status': fields.char('Status', size=64),
+    'status': fields.char('SC Status', size=64),
     }
     _defaults = {
                  'project_types':lambda *a:'General'
@@ -444,6 +443,7 @@ class project_material(osv.osv):
     _name = 'project.material'
     _columns = {
     'name': fields.many2one('project.project', 'Project'),
+<<<<<<< HEAD
     'network': fields.char('Network(E)', size=64),
     'item': fields.char('Item(H)', size=64),
     'transaction_no': fields.integer('Transaction No.'),
@@ -456,6 +456,18 @@ class project_material(osv.osv):
     'pa_gi_doc': fields.char('PA-GI Document(BP)', size=64),
     'gi_date': fields.char('PA GI Date(BQ)', size=64),
     'po_pa': fields.char('PO(P-A)#(BS)', size=64),
+=======
+    'network': fields.char('Network', size=64),
+    'mat_desc': fields.char('Matr Desc', size=64),
+    'item': fields.char('Item', size=64),
+    'req_quantiity':fields.integer('Required Quantity'),
+    'shiping_date': fields.date('Shipping Date'),
+    'material_req_date': fields.date('Required Date'),
+    'delivery_pa': fields.char('Delivery PA', size=64),
+    'delivery_date': fields.date('Delivery Date'),
+    'pa_gi_doc': fields.char('PA-GI Document', size=64),
+    'gi_date': fields.char('Delivery PA', size=64),
+>>>>>>> 19f62d45284a5fbd485a74fbf89d3db4ef752e5d
     'remarls': fields.char('Remarks', size=64),
     }
     _defaults = {
