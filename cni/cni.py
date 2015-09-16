@@ -443,7 +443,6 @@ class project_material(osv.osv):
     _name = 'project.material'
     _columns = {
     'name': fields.many2one('project.project', 'Project'),
-<<<<<<< HEAD
     'network': fields.char('Network(E)', size=64),
     'item': fields.char('Item(H)', size=64),
     'transaction_no': fields.integer('Transaction No.'),
@@ -456,7 +455,6 @@ class project_material(osv.osv):
     'pa_gi_doc': fields.char('PA-GI Document(BP)', size=64),
     'gi_date': fields.char('PA GI Date(BQ)', size=64),
     'po_pa': fields.char('PO(P-A)#(BS)', size=64),
-=======
     'network': fields.char('Network', size=64),
     'mat_desc': fields.char('Matr Desc', size=64),
     'item': fields.char('Item', size=64),
@@ -467,7 +465,6 @@ class project_material(osv.osv):
     'delivery_date': fields.date('Delivery Date'),
     'pa_gi_doc': fields.char('PA-GI Document', size=64),
     'gi_date': fields.char('Delivery PA', size=64),
->>>>>>> 19f62d45284a5fbd485a74fbf89d3db4ef752e5d
     'remarls': fields.char('Remarks', size=64),
     }
     _defaults = {
