@@ -396,17 +396,7 @@
 		    <field name="model">project.material</field>
 		    <field name="arch" type="xml">
 		    <tree editable = "bottom" string="Tools Reservation">
-<<<<<<< HEAD
-		        <field name="mat_desc" readonly = "1"/>
-				 <field name="req_quantiity" readonly = "1" />
-		        <field name="shiping_date" readonly = "1"/>
-				 <field name="material_req_date" readonly = "1"/>
-		        <field name="delivery_pa" readonly = "1"/>
-				<field name="delivery_date" readonly = "1"/>
-				 <field name="pa_gi_doc" readonly = "1"/>
-		        <field name="gi_date" readonly = "1"/>
-				<field name="po_pa" readonly = "1"/>
-=======
+
 		        <field name="network"/>
 				<field name="item"/>
 				<field name="mat_desc"/>
@@ -417,7 +407,6 @@
 				<field name="delivery_date"/>
 				 <field name="pa_gi_doc"/>
 		        <field name="gi_date"/>
->>>>>>> 19f62d45284a5fbd485a74fbf89d3db4ef752e5d
 				 <field name="remarls"/>
 		    </tree>
 		    </field>
