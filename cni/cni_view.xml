@@ -398,8 +398,9 @@
 		    <tree editable = "bottom" string="Tools Reservation">
 
 		        <field name="network"/>
-				<field name="item"/>
+				<!--<field name="item"/>
 				<field name="activity_description"/>
+				<field name="plant"/>-->
 				<field name="mat_desc"/>
 				<field name="req_quantiity"/>
 		        <field name="shiping_date"/>
