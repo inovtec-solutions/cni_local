@@ -399,6 +399,7 @@
 
 		        <field name="network"/>
 				<field name="item"/>
+				<field name="activity_description"/>
 				<field name="mat_desc"/>
 				<field name="req_quantiity"/>
 		        <field name="shiping_date"/>

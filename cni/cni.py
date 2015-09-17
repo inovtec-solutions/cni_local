@@ -445,6 +445,7 @@ class project_material(osv.osv):
     'name': fields.many2one('project.project', 'Project'),
     'network': fields.char('Network(E)', size=64),
     'item': fields.char('Item(H)', size=64),
+    'activity_description': fields.char('Activity Description', size=64),
     'transaction_no': fields.integer('Transaction No.'),
     'mat_desc': fields.char('Matr Desc(W)', size=64),
     'req_quantiity':fields.integer('Required MtQuantity(AL)'),
