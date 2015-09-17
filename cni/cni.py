@@ -406,6 +406,10 @@ client_stock_lines()
 class project_project(osv.osv):
     """Extended project.project through inheritance"""
     
+    def unlink(self, cr, uid, ids, context=None):
+        raise osv.except_osv(('Not Allowed'),("Project once created, cannot be deleted, Contact your service provider."))
+        return 
+    
     def onchange_projecttype(self, cr, uid, ids,type):
         vals = {}
         if type=='Pre-Assembly':
@@ -434,7 +438,8 @@ class project_project(osv.osv):
     'status': fields.char('SC Status', size=64),
     }
     _defaults = {
-                 'project_types':lambda *a:'General'
+                 'project_types':lambda *a:'General',
+                 'privacy_visibility': 'followers',
     }
 project_project()
 
@@ -455,17 +460,7 @@ class project_material(osv.osv):
     'pa_gi_doc': fields.char('PA-GI Document(BP)', size=64),
     'gi_date': fields.char('PA GI Date(BQ)', size=64),
     'po_pa': fields.char('PO(P-A)#(BS)', size=64),
-    'network': fields.char('Network', size=64),
-    'mat_desc': fields.char('Matr Desc', size=64),
-    'item': fields.char('Item', size=64),
-    'req_quantiity':fields.integer('Required Quantity'),
-    'shiping_date': fields.date('Shipping Date'),
-    'material_req_date': fields.date('Required Date'),
-    'delivery_pa': fields.char('Delivery PA', size=64),
-    'delivery_date': fields.date('Delivery Date'),
-    'pa_gi_doc': fields.char('PA-GI Document', size=64),
-    'gi_date': fields.char('Delivery PA', size=64),
-    'remarls': fields.char('Remarks', size=64),
+    'remarks': fields.char('Remarks', size=64),
     }
     _defaults = {
     }
