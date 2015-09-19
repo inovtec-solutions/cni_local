@@ -127,9 +127,9 @@
 	            <group>
 				
 				<group attrs="{'readonly':[('state','!=','Draft')]}">
-					<field name="project" />
+					<field name="project" on_change="onchange_project(project)" />
 					<field name="date_dispatched" />
-					<field name="employee"/>
+					<field name="employee" />
 				</group>
 				<group attrs="{'readonly':[('state','=','Draft')]}">
 					<field name="dispatched_by" />
@@ -457,10 +457,24 @@
 		      <field name="inherit_id" ref="project.edit_project"/>
 		      <field name="type">form</field>
 		      <field name="arch" type="xml">
-			<field name="user_id" attrs="{'invisible':[('project_types','=','Pre-Assembly')]}" position="replace">
+			<field name="user_id" attrs="{'readonly':[('project_types','=','Pre-Assembly')]}" position="replace">
 			  	</field>	
 			  </field>
 		    </record>
+
+<!--Project inherited for projectmanager invisibly on slection-->
+<record model="ir.ui.view" id="inherit_res_users_form1">
+		      <field name="name">res.users.form</field>
+		      <field name="model">res.users</field>
+		      <field name="inherit_id" ref="base.view_users_form"/>
+		      <field name="type">form</field>
+		      <field name="arch" type="xml">
+				<field name="lang" position="after">
+				<field name="work_on_task" />
+			  </field>
+		  	</field>
+
+    </record>
 
 	<record id="view_project_view2_tree" model="ir.ui.view">
 		<field name="name">project.project.tree</field>

@@ -216,11 +216,23 @@ class daily_sale_reconciliation(osv.osv):
                 result[f.id] = sum
         return result
     
+    def onchange_project(self, cr, uid, ids, project_id):
+        result =[]
+        project_obj = self.pool.get('project.project').browse(cr, uid, project_id)
+        sql = """SELECT uid from project_user_rel WHERE
+                  project_id ="""+str(project_id)
+        cr.execute(sql)
+        rows=cr.fetchall() 
+        for id in  rows:
+            result.append(id[0]) 
+        res = {'domain': {'employee': [('id', 'in', result)]}}
+        return res
+    
     _name = "daily.sale.reconciliation"
     _columns = {
         'name': fields.char('Name', size=64),
         'project':  fields.many2one('project.project', 'Project', required=True, ondelete='restrict'),
-        'employee':  fields.many2one('hr.employee', 'Technician', required=True, ondelete='restrict'),
+        'employee':  fields.many2one('res.users', 'Technician',required=True, ondelete='restrict'),
         'date_dispatched':  fields.date('Date',required=True),
         'date_confirmed':  fields.date('Date Confirm',readonly=True),
         'dispatched_by':  fields.many2one('res.users', 'Dispatch By',readonly=True),
@@ -562,6 +574,31 @@ class project_stage_task(osv.osv):
     }
 project_stage_task()
 
+#-------------------------------------------------------------------------------------------------------------------------
+
+class res_users(osv.osv):
+    """This object inherited res_users adding a columns 'Can be assign milstone, this will filter this user'"""
+    _name = "res.users"
+    _description = "Project Task Work"
+    _inherit ='res.users'
+    _columns = {
+        'work_on_task': fields.boolean('Can be assigned Milestone'),
+            }
+
+res_users()
+
+#-----------------------------------------------------------------------------------------------------------------------------
+
+class project_task(osv.osv):
+    """This object inherited res_users adding a columns 'Can be assign milstone, this will filter this user'"""
+    _name = "project.task"
+    _description = "Project Task Work"
+    _inherit ='project.task'
+    _columns = {
+        'user_id': fields.many2one('res.users', 'Assigned to', domain=[('work_on_task', '=',True)], select=True, track_visibility='onchange'),
+            }
+
+project_task()
 
 
    
