@@ -427,10 +427,10 @@
 						<field name="project_types" required="1" on_change="onchange_projecttype(project_types)" />
 	                </group>
 	                <group string="Pre Assembly" attrs="{'invisible':[('project_types','!=','Pre-Assembly')]}" >
-						 <field name="wbs" />
-						<field name="project_id" />
-						<field name="actv_desc" />
-						<field name="status" />
+						 <field name="wbs" readonly="1" />
+						<field name="network_id" readonly="1"  />
+						<field name="actv_desc" readonly="1" />
+						<field name="status" readonly="1" />
 	                </group>
 				</group>
 					<notebook>
@@ -457,7 +457,7 @@
 		      <field name="inherit_id" ref="project.edit_project"/>
 		      <field name="type">form</field>
 		      <field name="arch" type="xml">
-			<field name="user_id" attrs="{'readonly':[('project_types','=','Pre-Assembly')]}" position="replace">
+			<field name="user_id" attrs="{'readonly':[('project_types','=','Pre-Assembly')]}" position="before">
 			  	</field>	
 			  </field>
 		    </record>
@@ -476,33 +476,7 @@
 
     </record>
 
-	<record id="view_project_view2_tree" model="ir.ui.view">
-		<field name="name">project.project.tree</field>
-	    <field name="model">project.project</field>
-	    <field name="arch" type="xml">
-	    <tree  string="Pre Assembly">
-	        <field name="primevera_id"/>
-	        <field name="actv_desc"/>
-			 <field name="wbs"/>
-			 <field name="site_code"/>
-	        <field name="status"/>
-			
-	    </tree>
-	    </field>
-	</record>
- <record id="action_project_view2_view" model="ir.actions.act_window">
-	    <field name="name">Pre Assembly</field>
-	    <field name="res_model">project.project</field>
-	    <field name="view_type">form</field>
-		<field name="view_id" ref="view_project_view2_tree"/>
-		<field name="view_mode">tree,form</field>
-	   	
-	</record>
- <!--Project_project View2 END-->
-
-
-
-
+	
 <!--Company inherited-->
 <record model="ir.ui.view" id="inherit_res_company_form">
 		      <field name="name">res.company.inherit</field>
@@ -561,6 +535,16 @@
 		      </field>
 		    </record>
 
+<!--filter on hr_employee-->
+<record id="ir_actions_open_selected_employee" model="ir.actions.server">
+            <field name="sequence" eval="5"/>
+            <field name="state">code</field>
+            <field name="type">ir.actions.server</field>
+            <field name="model_id" ref="model_hr_filter_employees_open"/>
+            <field name="code">action = pool.get('hr.filter.employees.open').open_current_employee(cr, uid, None, context)</field>
+            <field name="condition">True</field>
+            <field name="name">My Profile</field>
+        </record>
 
 </data>
 </openerp>

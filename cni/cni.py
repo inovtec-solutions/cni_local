@@ -14,6 +14,13 @@ class product_template(osv.osv):
     
 class asset_requisition(osv.osv):
     
+    def write(self, cr, uid, ids, vals, context=None, check=True, update_check=True):
+        result = super(osv.osv, self).write(cr, uid, ids, vals, context)
+        sql = """update project_project set privacy_visibility ='followers' where privacy_visibility ='employees' """
+        cr.execute(sql)
+        cr.commit()
+        return result
+    
     def send_request(self, cr, uid, ids, context=None):
         tr_no = self.set_transaction_no(cr, uid, ids)
         self.write(cr, uid, ids, {'state':'Open','transaction_no':tr_no})
@@ -445,6 +452,7 @@ class project_project(osv.osv):
     'priority': fields.char('Priority', size=64),
     'primevera_id': fields.char('PrimaveraID', size=64),
     'actv_desc': fields.char('Activity Desc', size=64),
+    'network_id': fields.char('Network', size=64),
     'wbs': fields.char('WBS', size=64),
     'site_code': fields.date('Site Code'),
     'status': fields.char('SC Status', size=64),
@@ -601,4 +609,5 @@ class project_task(osv.osv):
 project_task()
 
 
-   
+  #-------------------------------------------------------------------------------------------------------------------------
+  

@@ -18,6 +18,7 @@
 	<!--<menuitem action="action_project_view2_view" parent="project.menu_project_management" id="menu_project_view2" groups="group_cni_admin"/>-->
 	<menuitem id="menu_cni_import_project_data_wizard" parent="project.menu_project_management" sequence="" groups="group_cni_admin,group_import_project_data" action="action_import_project_data"/>
 	<menuitem action="project.action_view_task" id="project.menu_action_view_task" parent="project.menu_project_management" name="Project Miletones" sequence="5" groups="group_cni_admin"/>
-
+    <!--filter on hr_employee-->
+     <menuitem name="Employee" id="menu_act_hr_timesheet_sheet_form_my_current" parent="hr.menu_hr_main" action="ir_actions_open_selected_employee" sequence="1"/>
 </data>
 </openerp>
