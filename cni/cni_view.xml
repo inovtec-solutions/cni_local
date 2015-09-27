@@ -396,8 +396,7 @@
 		    <field name="model">project.material</field>
 		    <field name="arch" type="xml">
 		    <tree editable = "bottom" string="Tools Reservation">
-		        <field name="network" readonly = "1"/>
-				<field name="item" readonly = "1" />
+		        <field name="item" readonly = "1" />
 				<field name="mat_desc" readonly = "1"/>
 				<field name="req_quantiity" readonly = "1"/>
 		        <field name="shiping_date" readonly = "1"/>
@@ -422,11 +421,13 @@
 		      <field name="arch" type="xml">
 			<field name="name" position="after">
 			  	</field>	
-			<group >
+			
+				<group >
 					<group>
-						<field name="project_types" required="1" on_change="onchange_projecttype(project_types)" />
-	                </group>
-	                <group string="Pre Assembly" attrs="{'invisible':[('project_types','!=','Pre-Assembly')]}" >
+						<field name="project_types" required="1" on_change="onchange_projecttype(project_types)" attrs="{'readonly':[('excel_project','=','1')]}"/>
+	                	<field name="excel_project" invisible="1" />
+					</group>
+	                <group string="Pre Assembly" attrs="{'invisible':[('project_types','!=','Pre-Assembly')],'readonly':[('project_types','=','Pre-Assembly')]}" >
 						 <field name="wbs" readonly="1" />
 						<field name="network_id" readonly="1"  />
 						<field name="actv_desc" readonly="1" />

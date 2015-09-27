@@ -443,6 +443,7 @@ class project_project(osv.osv):
     _inherit ='project.project'
     _columns = {
     'partner_id': fields.many2one('res.partner', 'Client'),
+    'excel_project': fields.boolean('Issued',readonly=True),
     'project_types':fields.selection([('Pre-Assembly', 'Pre-Assembly'),('General', 'General')], 'Project Type'),
     'consumable': fields.one2many('daily.sale.reconciliation', 'project', 'Consumable'),
     'stockable': fields.one2many('get.client.stock', 'project', 'Stockable'),
@@ -459,6 +460,7 @@ class project_project(osv.osv):
     }
     _defaults = {
                  'project_types':lambda *a:'General',
+                 'excel_project':lambda *a:False,
                  'privacy_visibility': 'followers',
     }
 project_project()
@@ -468,7 +470,6 @@ class project_material(osv.osv):
     _name = 'project.material'
     _columns = {
     'name': fields.many2one('project.project', 'Project'),
-    'network': fields.char('Network(E)', size=64),
     'item': fields.char('Item(H)', size=64),
     'activity_description': fields.char('Activity Description', size=64),
     'plant': fields.float('Plant'),

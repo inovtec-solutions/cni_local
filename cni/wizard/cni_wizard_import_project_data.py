@@ -43,8 +43,20 @@ class cni_import_project_data(osv.osv_memory):
                     #_logger.info("_______________IF Project____________%r", project_id_excel)
             
                 else:
+                    
+                    res_partner = self.pool.get('res.partner').search(cr, uid, [('name','=','Bell')])
+                    if res_partner:
+                        res_partner = res_partner[0]
+                    
+                    network = str(worksheet.cell_value(row, 4))
+                    network = network.strip()
+                
                     project_id = self.pool.get('project.project').create(cr, uid, {
                         'name': project_id_excel,
+                        'network_id': network,
+                        'excel_project': True,
+                        'manager_id': None,
+                        'partner_id': res_partner,
                         'project_types': 'Pre-Assembly',
                         'project_id': project_id_excel,
                         'status': worksheet.cell_value(row, 10),
@@ -56,9 +68,6 @@ class cni_import_project_data(osv.osv_memory):
                 
                 activity_description =  str(worksheet.cell_value(row, 6))
                 activity_description = activity_description.strip()
-                                
-                network = str(worksheet.cell_value(row, 4))
-                network = network.strip()
                         
                 item = str(worksheet.cell_value(row, 34))
                 item = item.strip()
@@ -84,7 +93,15 @@ class cni_import_project_data(osv.osv_memory):
                 else:
                     material_req_date = material_req_date.replace(".", "/")
                 
-                material_exist = self.pool.get('project.material').search(cr, uid, [('name','=',project_id),('delivery_date','=',delivery_date),('plant','=',plant),('network','=',network),('activity_description','=',activity_description),('mat_desc','=',material_desc),('item','=',item)])
+                gi_date = str(worksheet.cell_value(row, 68))
+                if gi_date.strip() == "":
+                    gi_date = None
+                else:
+                    gi_date = gi_date.replace(".", "/")
+                
+                
+                material_exist = self.pool.get('project.material').search(cr, uid, [('name','=',project_id),('delivery_date','=',delivery_date),
+                    ('plant','=',plant),('activity_description','=',activity_description),('mat_desc','=',material_desc),('item','=',item)])
                     
                 if material_exist:
                     material_id = material_exist[0]
@@ -95,11 +112,12 @@ class cni_import_project_data(osv.osv_memory):
                         'req_quantiity': worksheet.cell_value(row,37),
                         'shiping_date': shiping_date,
                         'delivery_pa': worksheet.cell_value(row,63),
-                        'pa_gi_doc': worksheet.cell_value(row,67)}, context=context)
+                        'gi_date': gi_date,
+                        'po_pa': worksheet.cell_value(row,70),
+                        'pa_gi_doc': pa_gi_doc}, context=context)
                 else:
                     self.pool.get('project.material').create(cr, uid, {
                         'name': project_id,
-                        'network': network,
                         'item': item,
                         'activity_description': activity_description,
                         'plant': plant,
