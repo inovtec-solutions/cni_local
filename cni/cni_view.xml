@@ -424,7 +424,7 @@
 			
 				<group >
 					<group>
-						<field name="project_types" required="1" on_change="onchange_projecttype(project_types)" attrs="{'readonly':[('excel_project','=','1')]}"/>
+						<field name="project_types" required="1" on_change="onchange_projecttype(project_types)" attrs="{'readonly':[('excel_project','=',True)]}"/>
 	                	<field name="excel_project" invisible="1" />
 					</group>
 	                <group string="Pre Assembly" attrs="{'invisible':[('project_types','!=','Pre-Assembly')],'readonly':[('project_types','=','Pre-Assembly')]}" >
