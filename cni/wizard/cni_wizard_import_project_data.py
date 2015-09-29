@@ -136,6 +136,8 @@ class cni_import_project_data(osv.osv_memory):
                         'req_quantiity': worksheet.cell_value(row,37),
                         'shiping_date': shiping_date,
                         'delivery_pa': worksheet.cell_value(row,63),
+                        'gi_date': gi_date,
+                        'po_pa': worksheet.cell_value(row,70),
                         'pa_gi_doc': worksheet.cell_value(row,67)}, context=context)            
 
             row += 1
