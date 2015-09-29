@@ -69,11 +69,17 @@ class cni_import_project_data(osv.osv_memory):
                 activity_description =  str(worksheet.cell_value(row, 6))
                 activity_description = activity_description.strip()
                         
-                item = str(worksheet.cell_value(row, 34))
+                item = str(worksheet.cell_value(row, 7))
                 item = item.strip()
+                
+                network = str(worksheet.cell_value(row, 4))
+                network = network.strip()
                 
                 pa_gi_doc = str(worksheet.cell_value(row, 56))
                 pa_gi_doc = pa_gi_doc.strip()
+                
+                gr_doc_pa = str(worksheet.cell_value(row, 72))
+                gr_doc_pa = gr_doc_pa.strip()
                 
                 delivery_date = str(worksheet.cell_value(row,66))
                 if delivery_date.strip() == "":
@@ -100,8 +106,8 @@ class cni_import_project_data(osv.osv_memory):
                     gi_date = gi_date.replace(".", "/")
                 
                 
-                material_exist = self.pool.get('project.material').search(cr, uid, [('name','=',project_id),('delivery_date','=',delivery_date),
-                    ('plant','=',plant),('activity_description','=',activity_description),('mat_desc','=',material_desc),('item','=',item)])
+                material_exist = self.pool.get('project.material').search(cr, uid, [('network_id','=',network),('plant','=',plant),
+                            ('activity_description','=',activity_description),('item','=',item),('gr_doc_pa','=',gr_doc_pa)])
                     
                 if material_exist:
                     material_id = material_exist[0]
@@ -118,11 +124,13 @@ class cni_import_project_data(osv.osv_memory):
                 else:
                     self.pool.get('project.material').create(cr, uid, {
                         'name': project_id,
+                        'network_id': network,
                         'item': item,
                         'activity_description': activity_description,
                         'plant': plant,
                         'delivery_date': delivery_date,
                         'pa_gi_doc': pa_gi_doc,
+                        'gr_doc_pa': gr_doc_pa,
                         'material_req_date': material_req_date,
                         'mat_desc': material_desc,
                         'req_quantiity': worksheet.cell_value(row,37),
