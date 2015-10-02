@@ -427,7 +427,9 @@
 						<field name="project_types" required="1" on_change="onchange_projecttype(project_types)" attrs="{'readonly':[('excel_project','=',True)]}"/>
 	                	<field name="excel_project" invisible="1" />
 					</group>
-	                <group string="Pre Assembly" attrs="{'invisible':[('project_types','!=','Pre-Assembly')],'readonly':[('project_types','=','Pre-Assembly')]}" >
+	                <group>
+	                </group>
+	                 <group string="Pre Assembly" attrs="{'invisible':[('project_types','!=','Pre-Assembly')],'readonly':[('project_types','=','Pre-Assembly')]}" >
 						 <field name="wbs" readonly="1" />
 						<field name="network_id" readonly="1"  />
 						<field name="actv_desc" readonly="1" />
@@ -458,7 +460,7 @@
 		      <field name="inherit_id" ref="project.edit_project"/>
 		      <field name="type">form</field>
 		      <field name="arch" type="xml">
-			<field name="user_id" attrs="{'readonly':[('project_types','=','Pre-Assembly')]}" position="before">
+			<field name="user_id" attrs="{'readonly':[('project_types','=','Pre-Assembly')]}" position="replace">
 			  	</field>	
 			  </field>
 		    </record>

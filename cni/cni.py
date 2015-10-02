@@ -1,6 +1,7 @@
 from openerp.osv import fields, osv
 import datetime
 import logging
+import math
 
 _logger = logging.getLogger(__name__)
 
@@ -92,7 +93,7 @@ class asset_requisition(osv.osv):
             sql = """SELECT max(id) FROM asset_requisition WHERE state <> 'Draft'"""
             cr.execute(sql)
             numb = cr.fetchone()
-            if numb:
+            if numb is not none  >0:
                 numb = int(numb[0])+1
                 
             else:
@@ -444,7 +445,7 @@ class project_project(osv.osv):
     _columns = {
     'partner_id': fields.many2one('res.partner', 'Client'),
     'excel_project': fields.boolean('Issued',readonly=True),
-    'project_types':fields.selection([('Pre-Assembly', 'Pre-Assembly'),('General', 'General')], 'Project Type'),
+    'project_types':fields.selection([('Pre-Assembly', 'Pre-Assembly'),('General', 'General')], 'Project Location'),
     'consumable': fields.one2many('daily.sale.reconciliation', 'project', 'Consumable'),
     'stockable': fields.one2many('get.client.stock', 'project', 'Stockable'),
     'tools_used': fields.one2many('asset.requisition', 'project', 'Tools'),
@@ -492,6 +493,53 @@ class project_material(osv.osv):
 project_material()
 
 class project_work(osv.osv):
+    
+    def check_constrains(self, cr, uid, vals,task_id):
+        rec_task = self.pool.get('project.task').browse(cr,uid,task_id)
+        if 'date' in vals:
+            deadline = rec_task.date_deadline
+            if deadline:
+                if vals['date'] > deadline:
+                    raise osv.except_osv(('Not Allowed'),("Work date must be within milestone deadline."))
+        if rec_task.planned_hours:
+            planned_hours = rec_task.planned_hours
+        else:
+            planned_hours = 0
+        
+        if 'hours' in vals:
+            #calculate all work time spent for this task i.e milestone
+            work_ids = self.pool.get('project.task.work').search(cr, uid, [('task_id','=',task_id)])
+            if work_ids:
+                work_rec = self.pool.get('project.task.work').browse(cr,uid,work_ids)
+                total_spent_hrs = 0
+                for spent_hour in work_rec:
+                    total_spent_hrs = total_spent_hrs + spent_hour.hours
+                #compare
+                if float(planned_hours - total_spent_hrs) < vals['hours']:
+                    warning = "This milestone has total hours "+str(planned_hours - total_spent_hrs)," (Out of  " +str(planned_hours)+") Avaible.\n Your work hours must be not greater than "+str(planned_hours - total_spent_hrs)+"\n"+str(vals['hours'])+"Can't be accumudated.  "
+                    raise osv.except_osv(('Work Hour Exceeds'),(warning))
+                else:
+                    return True
+        return 
+    
+    def create(self, cr, uid, vals, context=None, check=True):
+        result = super(osv.osv, self).create(cr, uid, vals, context)
+        for f in self.browse(cr,uid,result):
+            check = self.check_constrains(cr, uid, vals,f.task_id.id)
+        return result
+  
+     
+    def write(self, cr, uid, ids, vals, context=None, check=True, update_check=True):
+        for f in self.browse(cr,uid,ids):
+            check = self.check_constrains(cr, uid, vals,f.task_id.id)
+            if check:
+                result = super(osv.osv, self).write(cr, uid, ids, vals, context)
+        return result
+     
+    def unlink(self, cr, uid, ids, context=None):
+        result = super(osv.osv, self).unlink(cr, uid, ids, context)
+        return result 
+    
     """This object inherites project_task_work object ony one filed is change work summary of acutal module is change to task summary"""
     _name = "project.task.work"
     _description = "Project Task Work"
