@@ -92,7 +92,7 @@
                     <div class="oe_title">
                         <label for="name" class="oe_edit_only" string="Project Name"/>
                         <h1>
-                            <field name="name" string="Project Name" attrs="{'readonly':[('project_types','=','Pre-Assembly')]}"/>
+                            <field name="name" string="Project Name"/>
                         </h1>
                         <div name="options_active">
                             <field name="use_tasks" class="oe_inline"/>
