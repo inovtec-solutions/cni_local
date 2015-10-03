@@ -445,6 +445,7 @@ class project_project(osv.osv):
     _columns = {
     'partner_id': fields.many2one('res.partner', 'Client'),
     'excel_project': fields.boolean('Issued',readonly=True),
+    'project_planned_hours': fields.float('Project Hours'),
     'project_types':fields.selection([('Pre-Assembly', 'Pre-Assembly'),('General', 'General')], 'Project Location'),
     'consumable': fields.one2many('daily.sale.reconciliation', 'project', 'Consumable'),
     'stockable': fields.one2many('get.client.stock', 'project', 'Stockable'),
@@ -500,12 +501,19 @@ class project_work(osv.osv):
             deadline = rec_task.date_deadline
             if deadline:
                 if vals['date'] > deadline:
-                    raise osv.except_osv(('Not Allowed'),("Work date must be within milestone deadline."))
+                    raise osv.except_osv(('Not Allowed'),("Work date must be within Task deadline."))
         if rec_task.planned_hours:
             planned_hours = rec_task.planned_hours
         else:
             planned_hours = 0
         
+        override_limit = False
+        
+        if 'override_hrs' in vals:
+            if vals['override_hrs']:
+                override_limit = True
+        elif rec_task.override_hrs:
+            override_limit = True
         if 'hours' in vals:
             #calculate all work time spent for this task i.e milestone
             work_ids = self.pool.get('project.task.work').search(cr, uid, [('task_id','=',task_id)])
@@ -515,9 +523,9 @@ class project_work(osv.osv):
                 for spent_hour in work_rec:
                     total_spent_hrs = total_spent_hrs + spent_hour.hours
                 #compare
-                if float(planned_hours - total_spent_hrs) < vals['hours']:
-                    warning = "This milestone has total hours "+str(planned_hours - total_spent_hrs)," (Out of  " +str(planned_hours)+") Avaible.\n Your work hours must be not greater than "+str(planned_hours - total_spent_hrs)+"\n"+str(vals['hours'])+"Can't be accumudated.  "
-                    raise osv.except_osv(('Work Hour Exceeds'),(warning))
+                if float(planned_hours - total_spent_hrs) < vals['hours'] and not override_limit:
+                    warning = "This Task has total hours "+str(planned_hours - total_spent_hrs)," (Out of  " +str(planned_hours)+") Avaible.\n Your work hours must be not greater than "+str(planned_hours - total_spent_hrs)+"\n"+str(vals['hours'])+"Can't be accumudated.  "
+                    raise osv.except_osv(('Work Hour Exceeds'),('Reset Spent Hours'))
                 else:
                     return True
         return 
@@ -641,7 +649,7 @@ class res_users(osv.osv):
     _description = "Project Task Work"
     _inherit ='res.users'
     _columns = {
-        'work_on_task': fields.boolean('Can be assigned Milestone'),
+        'work_on_task': fields.boolean('Can be assigned Tasks'),
             }
 
 res_users()
@@ -655,6 +663,7 @@ class project_task(osv.osv):
     _inherit ='project.task'
     _columns = {
         'user_id': fields.many2one('res.users', 'Assigned to', domain=[('work_on_task', '=',True)], select=True, track_visibility='onchange'),
+        'override_hrs':fields.boolean('Override Task Hours')
             }
 
 project_task()

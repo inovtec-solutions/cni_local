@@ -283,7 +283,7 @@
 	    </field>
 	</record>
 
-
+	
 
 
 <!--Clinet stock provision-->
@@ -419,19 +419,35 @@
 		      <field name="inherit_id" ref="project.edit_project"/>
 		      <field name="type">form</field>
 		      <field name="arch" type="xml">
-			<field name="name" position="after">
-			  	</field>	
-			
-				<group >
+			  	<data>
+			  	 <field name="alias_id" position = "replace"/>
+			  	 <field name="alias_model" position = "replace"/>
+                 <field name="alias_contact" position = "replace"/>
+                 <!--make invisible start and end date from page other info-->
+			  	 <field name="date_start" position = "replace"/>
+                 <field name="date" position = "replace"/>
+                  <field name="user_id" position = "replace"/>
+                  <field name="planned_hours" position = "replace" />
+                   <field name="effective_hours"  position = "replace"/>
+			  	<group>
 					<group>
-						<field name="project_types" required="1" on_change="onchange_projecttype(project_types)" attrs="{'readonly':[('excel_project','=',True)]}"/>
+						<field name="user_id" attrs="{'readonly':[('project_types','=','Pre-Assembly')]}"/>	
+						<field name="project_planned_hours" required = "1" widget="float_time"/>
+						<field name="planned_hours" widget="float_time" groups="project.group_time_work_estimation_tasks"/>
+                        <field name="effective_hours" widget="float_time" groups="project.group_time_work_estimation_tasks"/>
 	                	<field name="excel_project" invisible="1" />
 					</group>
-	                <group>
-	                </group>
-	                 <group string="Pre Assembly" attrs="{'invisible':[('project_types','!=','Pre-Assembly')],'readonly':[('project_types','=','Pre-Assembly')]}" >
+					<group>
+						<field name="project_types" required="1" on_change="onchange_projecttype(project_types)" attrs="{'readonly':[('excel_project','=',True)]}"/>
+						<field name="date_start" required = "1" string="Start Date"/>
+                        <field name="date" string="End Date"/>
+                         
+					</group>
+	                 <group string="" attrs="{'invisible':[('project_types','!=','Pre-Assembly')],'readonly':[('project_types','=','Pre-Assembly')]}" >
 						 <field name="wbs" readonly="1" />
 						<field name="network_id" readonly="1"  />
+	                </group>
+	                <group string="" attrs="{'invisible':[('project_types','!=','Pre-Assembly')],'readonly':[('project_types','=','Pre-Assembly')]}" >
 						<field name="actv_desc" readonly="1" />
 						<field name="status" readonly="1" />
 	                </group>
@@ -450,20 +466,31 @@
 					<field name="material_ids" />
 			    	</page>
 			   </notebook>
-		      </field>
+			  	</data>
+			  </field>	
 		    </record>
 
-<!--Project inherited for projectmanager invisibly on slection-->
-<record model="ir.ui.view" id="inherit_project_form2">
-		      <field name="name">project.inherit</field>
-		      <field name="model">project.project</field>
-		      <field name="inherit_id" ref="project.edit_project"/>
-		      <field name="type">form</field>
-		      <field name="arch" type="xml">
-			<field name="user_id" attrs="{'readonly':[('project_types','=','Pre-Assembly')]}" position="replace">
-			  	</field>	
-			  </field>
-		    </record>
+<!--Project task form view-->
+<record model="ir.ui.view" id="view_project_task_form_inherited">
+    <field name="name">project.task</field>
+    <field name="model">project.task</field>
+    <field name="inherit_id" ref="project.view_task_form2"/>
+    <field name="arch" type="xml">
+        <data>
+            <field name="date_deadline" position="replace"/>
+            <field name="planned_hours" position="replace"/>
+            <group>
+            <group>
+             <field name="planned_hours" required = "1"/>
+            </group>
+             <group>
+             <field name="date_deadline" required = "1" />
+            <field name="override_hrs" />
+            </group>
+             </group>
+        </data>
+    </field>
+</record>
 
 <!--Project inherited for projectmanager invisibly on slection-->
 <record model="ir.ui.view" id="inherit_res_users_form1">
