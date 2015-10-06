@@ -445,6 +445,7 @@ class project_project(osv.osv):
     _columns = {
     'partner_id': fields.many2one('res.partner', 'Client'),
     'excel_project': fields.boolean('Issued',readonly=True),
+    'upload_file': fields.binary('File'),
     'project_planned_hours': fields.float('Project Hours'),
     'project_types':fields.selection([('Pre-Assembly', 'Pre-Assembly'),('General', 'General')], 'Project Location'),
     'consumable': fields.one2many('daily.sale.reconciliation', 'project', 'Consumable'),
@@ -617,29 +618,30 @@ class project_types(osv.osv):
     _name = 'project.types'
     _columns = {
     'name': fields.many2one('res.company', 'Types', readonly = True),
-    'project_types':fields.selection([('Pre-Assembly', 'Pre-Assembly'),('Installation', 'Installation'),('General', 'General')], 'Project Types'),
-    'project_stages_ids': fields.one2many('project.stages', 'name', 'Project Stages'),
+    'project_types':fields.selection([('Bell', 'Bell'),('TellUs', 'TellUs'),('Radio', 'Radio'),('Shelter', 'Shelter')], 'Project Types'),
+    'project_tasks_ids': fields.one2many('project.tasks', 'project_id', 'Tasks'),
     }
 project_types()
 
-class project_stages(osv.osv):
-    """This objects stores record of tools reserved by an employee"""
-    _name = 'project.stages'
+class project_tasks(osv.osv):
+    """"""
+    _name = 'project.tasks'
     _columns = {
-    'name': fields.many2one('project.types', 'Types'),
+    'name': fields.many2one('project.types', 'Task'),
+    'project_id': fields.many2one('project.types', 'Types'),
     'project_stage':fields.char('Stage',size = 150),
-    'stage_task_ids': fields.one2many('project.stage.task', 'name', 'Tasks'),
+    'project_task_work_ids': fields.one2many('project.task.work', 'task_id', 'Task Activity'),
     }
-project_stages()
+project_tasks()
 
-class project_stage_task(osv.osv):
-    """This object stores project stage tasks, task are associated with stages"""
-    _name = 'project.stage.task'
+class project_task_work(osv.osv):
+    """This object stores project  tasks work activities, task are associated with task"""
+    _name = 'project.task.work'
     _columns = {
-    'name': fields.many2one('project.stages', 'Stage'),
-    'task':fields.char('Task',size = 150),
+    'task_id': fields.many2one('project.tasks', 'Task'),
+    'name':fields.char('Activity',size = 150),
     }
-project_stage_task()
+project_task_work()
 
 #-------------------------------------------------------------------------------------------------------------------------
 
