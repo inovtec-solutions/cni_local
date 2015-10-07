@@ -214,7 +214,15 @@
 	            <group>
 	                <group>
 	                    <field name="name" invisible ="1" />
-						<field name="project_types" />
+						<h1><field name="project_location" /></h1>
+						<p>Select a project location and define its task and activities. 
+						Task associated with each project type will be auto loaded at project creation when
+						user select a partucular project location </p>
+	                </group>
+	                <group>
+						<p>Select a project location and define its task and activities. 
+						Task associated with each project type will be auto loaded at project creation when
+						user select a particular project location .</p>
 	                </group>
 	            </group>
 	            <notebook>
@@ -226,17 +234,28 @@
 		</form>
 	    </field>
     </record>
+    <record id="project_location_tree" model="ir.ui.view">
+		<field name="name">project.types.tree</field>
+	    <field name="model">project.types</field>
+	    <field name="arch" type="xml">
+	    <tree string="Project Location">
+	        <field name="project_id"/>
+	    </tree>
+	    </field>
+	</record>
+    
+    
     
     <record id="project_tasks_form" model="ir.ui.view">
-		<field name="name">project.tasks.form</field>
-	    <field name="model">project.tasks</field>
+		<field name="name">project.tasks.default.form</field>
+	    <field name="model">project.tasks.default</field>
 	    <field name="arch" type="xml">
 		<form string="Tasks in Project">
 			<sheet string="Project Tasks">
 	            <group>
 	                <group>
-	                   <h1><field name="name" placeholder = "Task Name" nolabel = "1"/></h1>
-						<field name="project_types" nolabel = "1" placeholder = "Project" />
+	                   <h1><field name="name" placeholder = "Task Name"/></h1>
+						<field name="project_id" nolabel = "1" readonly = "1" />
 	                </group>
 	            </group>
 	            <notebook>
@@ -250,8 +269,8 @@
     </record>
 
 	<record id="project_project_tasks_tree" model="ir.ui.view">
-		<field name="name">project.tasks.tree</field>
-	    <field name="model">project.tasks</field>
+		<field name="name">project.tasks.default.tree</field>
+	    <field name="model">project.tasks.default</field>
 	    <field name="arch" type="xml">
 	    <tree string="Tasks">
 	        <field name="name"/>
@@ -263,8 +282,8 @@
 
 <!--task work-->
 <record id="project_task_activity_tree" model="ir.ui.view">
-		<field name="name">project.task.work.tree</field>
-	    <field name="model">project.task.work</field>
+		<field name="name">project.task.work.default.tree</field>
+	    <field name="model">project.task.work.default</field>
 	    <field name="arch" type="xml">
 	    <tree editable = "bottom" string="Task Activities">
 	        <field name="name"/>

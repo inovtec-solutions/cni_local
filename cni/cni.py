@@ -618,30 +618,30 @@ class project_types(osv.osv):
     _name = 'project.types'
     _columns = {
     'name': fields.many2one('res.company', 'Types', readonly = True),
-    'project_types':fields.selection([('Bell', 'Bell'),('TellUs', 'TellUs'),('Radio', 'Radio'),('Shelter', 'Shelter')], 'Project Types'),
-    'project_tasks_ids': fields.one2many('project.tasks', 'project_id', 'Tasks'),
+    'project_location':fields.selection([('Bell', 'Bell'),('TellUs', 'TellUs'),('Radio', 'Radio'),('Shelter', 'Shelter')], 'Project Location'),
+    'project_tasks_ids': fields.one2many('project.tasks.default', 'project_id', 'Tasks'),
     }
 project_types()
 
-class project_tasks(osv.osv):
+class project_tasks_default(osv.osv):
     """"""
-    _name = 'project.tasks'
+    _name = 'project.tasks.default'
     _columns = {
-    'name': fields.many2one('project.types', 'Task'),
+    'name': fields.char('Task',size = 100,required = True),
     'project_id': fields.many2one('project.types', 'Types'),
     'project_stage':fields.char('Stage',size = 150),
-    'project_task_work_ids': fields.one2many('project.task.work', 'task_id', 'Task Activity'),
+    'project_task_work_ids': fields.one2many('project.task.work.default', 'task_id', 'Task Activity'),
     }
-project_tasks()
+project_tasks_default()
 
-class project_task_work(osv.osv):
+class project_task_work_default(osv.osv):
     """This object stores project  tasks work activities, task are associated with task"""
-    _name = 'project.task.work'
+    _name = 'project.task.work.default'
     _columns = {
-    'task_id': fields.many2one('project.tasks', 'Task'),
+    'task_id': fields.many2one('project.tasks.default', 'Task'),
     'name':fields.char('Activity',size = 150),
     }
-project_task_work()
+project_task_work_default()
 
 #-------------------------------------------------------------------------------------------------------------------------
 
