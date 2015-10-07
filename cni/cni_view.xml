@@ -291,7 +291,6 @@
 	    </field>
 	</record>
 
-
 <!--Client stock provision-->
 
 	<record id="client_stock_provide_form" model="ir.ui.view">
