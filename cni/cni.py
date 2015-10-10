@@ -426,6 +426,44 @@ client_stock_lines()
 class project_project(osv.osv):
     """Extended project.project through inheritance"""
     
+    def load_tasks_and_activities(self,cr,uid,proj_id):
+        """Loads for bell projects only"""
+        project_type_id = self.pool.get('project.types').search(cr, uid, [('project_location','=','Bell')])
+        if project_type_id:
+            default_task_id = self.pool.get('project.tasks.default').search(cr, uid, [('project_id','=',project_type_id[0])])
+            if default_task_id:
+                rec_default_task = self.pool.get('project.tasks.default').browse(cr, uid,default_task_id)
+                for d_task in rec_default_task:
+                    #now create task record in project.task
+                    task_id = self.pool.get('project.task').create(cr,uid,{
+                                                'name':d_task.name,
+                                                'project_id':proj_id, 
+                                                'planned_hours':d_task.planned_hours,
+                                                'user_id':d_task.user_id.id
+                                                 })
+                    if task_id:
+                        #search default_work activities of task using default task id
+                        activity_ids = self.pool.get('project.task.work.default').search(cr, uid, [('task_id','=',d_task.id)])
+                        if activity_ids:
+                            rec_default_task = self.pool.get('project.task.work.default').browse(cr, uid,activity_ids)
+                            for activity in rec_default_task:
+                                #now create task activities
+                                self.pool.get('project.task.work').create(cr,uid,{
+                                                'name':activity.name,
+                                                'task_id':task_id, 
+                                                'user_id':activity.user_id.id,
+                                                'hours':activity.hours
+                                                 })
+        return
+   
+    def create(self, cr, uid, vals, context=None, check=True):
+        result = super(osv.osv, self).create(cr, uid, vals, context)
+        for f in self.browse(cr,uid,result):
+            if f.project_location == "Bell":
+                load = self.load_tasks_and_activities(cr,uid,f.id)
+        return result
+   
+    
     def unlink(self, cr, uid, ids, context=None):
         raise osv.except_osv(('Not Allowed'),("Project once created, cannot be deleted, Contact your service provider."))
         return 
@@ -448,6 +486,7 @@ class project_project(osv.osv):
     'upload_file': fields.binary('File'),
     'project_planned_hours': fields.float('Project Hours'),
     'project_types':fields.selection([('Pre-Assembly', 'Pre-Assembly'),('General', 'General')], 'Project Location'),
+    'project_location':fields.selection([('Bell', 'Bell'),('TellUs', 'TellUs'),('Radio', 'Radio'),('Shelter', 'Shelter')], 'Project Type'),
     'consumable': fields.one2many('daily.sale.reconciliation', 'project', 'Consumable'),
     'stockable': fields.one2many('get.client.stock', 'project', 'Stockable'),
     'tools_used': fields.one2many('asset.requisition', 'project', 'Tools'),
@@ -628,9 +667,11 @@ class project_tasks_default(osv.osv):
     _name = 'project.tasks.default'
     _columns = {
     'name': fields.char('Task',size = 100,required = True),
+    'planned_hours': fields.float('Initially Planned Hours', help='Estimated time to do the task, usually set by the project manager when the task is in draft state.'),
     'project_id': fields.many2one('project.types', 'Types'),
     'project_stage':fields.char('Stage',size = 150),
     'project_task_work_ids': fields.one2many('project.task.work.default', 'task_id', 'Task Activity'),
+    'user_id': fields.many2one('res.users', 'Done by', required=True),
     }
 project_tasks_default()
 
@@ -639,7 +680,9 @@ class project_task_work_default(osv.osv):
     _name = 'project.task.work.default'
     _columns = {
     'task_id': fields.many2one('project.tasks.default', 'Task'),
-    'name':fields.char('Activity',size = 150),
+    'name':fields.char('Activity',size = 150,required=True,),
+    'user_id': fields.many2one('res.users', 'Will be Assigned to', required=True),
+    'hours': fields.float('Time to be Spent'),
     }
 project_task_work_default()
 
