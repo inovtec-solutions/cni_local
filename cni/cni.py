@@ -478,9 +478,27 @@ class project_project(osv.osv):
         else:
             return {} 
     
+    def is_access_restricted(self, cr, uid, ids, context={}, arg=None, obj=None):
+        result = {}
+        records = self.browse(cr, uid, ids)
+        sql="""select *
+                from res_groups_users_rel
+                 inner join res_groups
+                on res_groups.id=res_groups_users_rel.gid
+                where res_groups_users_rel.uid="""+str(uid)+""" and res_groups.name in ('Group CNI Technician')"""
+        cr.execute(sql)
+        res=cr.fetchone()
+        for f in records:
+            if res:
+                result[f.id] = True
+            else:
+                result[f.id] = False
+        return result
+    
     _name = 'project.project'
     _inherit ='project.project'
     _columns = {
+    'restrict_access':fields.function(is_access_restricted, method=True, string='Restrict Access',type='boolean'),
     'partner_id': fields.many2one('res.partner', 'Client'),
     'excel_project': fields.boolean('Issued',readonly=True),
     'upload_file': fields.binary('File'),
@@ -589,11 +607,31 @@ class project_work(osv.osv):
         return result 
     
     """This object inherites project_task_work object ony one filed is change work summary of acutal module is change to task summary"""
+    
+    def is_access_restricted(self, cr, uid, ids, context={}, arg=None, obj=None):
+        result = {}
+        records = self.browse(cr, uid, ids, context)
+        sql="""select *
+                from res_groups_users_rel
+                 inner res_groups
+                on res_groups.id=res_groups_users_rel.gid
+                where res_groups_users_rel.uid="""+str(uid)+""" and res_groups.name in ('Group CNI Technician')"""
+        cr.execute(sql)
+        res=cr.fetchone()
+        for f in records:
+            if res:
+                result[f.id] = True
+            else:
+                result[f.id] = False
+        return result
+
+    
     _name = "project.task.work"
     _description = "Project Task Work"
     _inherit ='project.task.work'
     _columns = {
         'name': fields.char('Task Summary'),
+        'restrict_access':fields.function(is_access_restricted, method=True,  size=256, string='Restrict Access',type='boolean'),
             }
 
 project_work()
@@ -703,12 +741,31 @@ res_users()
 
 class project_task(osv.osv):
     """This object inherited res_users adding a columns 'Can be assign milstone, this will filter this user'"""
+    def is_access_restricted(self, cr, uid, ids, arg=None, obj=None):
+        result = {}
+        records = self.browse(cr, uid, ids)
+        sql="""select *
+                from res_groups_users_rel
+                 inner join res_groups
+                on res_groups.id=res_groups_users_rel.gid
+                where res_groups_users_rel.uid="""+str(uid)+""" and res_groups.name in ('Group CNI Technician')"""
+        cr.execute(sql)
+        res=cr.fetchone()
+        for f in records:
+            if res:
+                result[f.id] = True
+            else:
+                result[f.id] = False
+        return result
+
+    
     _name = "project.task"
     _description = "Project Task Work"
     _inherit ='project.task'
     _columns = {
         'user_id': fields.many2one('res.users', 'Assigned to', domain=[('work_on_task', '=',True)], select=True, track_visibility='onchange'),
-        'override_hrs':fields.boolean('Override Task Hours')
+        'override_hrs':fields.boolean('Override Task Hours'),
+        'restrict_access':fields.function(is_access_restricted, method=True, string='Restrict Access',type='boolean'),
             }
 
 project_task()

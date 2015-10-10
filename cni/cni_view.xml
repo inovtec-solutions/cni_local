@@ -443,14 +443,15 @@
                   <field name="planned_hours" position = "replace" />
                    <field name="effective_hours"  position = "replace"/>
 			  	<group>
-					<group>
+					
+					<group >
 						<field name="user_id" attrs="{'readonly':[('project_types','=','Pre-Assembly')]}"/>	
 						<field name="project_planned_hours" required = "1" widget="float_time"/>
 						<field name="planned_hours" widget="float_time" groups="project.group_time_work_estimation_tasks"/>
                         <field name="effective_hours" widget="float_time" groups="project.group_time_work_estimation_tasks"/>
 	                	<field name="excel_project" invisible="1" />
 					</group>
-					<group>
+					<group attrs="{'readonly':[('restrict_access','=',1)]}">
 						<field name="project_location" required="1"/>
 						<field name="project_types" required="1" on_change="onchange_projecttype(project_types)" attrs="{'readonly':[('excel_project','=',True)]}"/>
 						<field name="date_start" required = "1" string="Start Date"/>
@@ -480,6 +481,9 @@
 					<field name="material_ids" />
 			    	</page>
 			   </notebook>
+			   <group>
+					<field name="restrict_access"  invisible = "1"/>
+					</group>
 			  	</data>
 			  </field>	
 		    </record>
