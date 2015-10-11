@@ -262,10 +262,10 @@ class project(osv.osv):
         'task_ids': fields.one2many('project.task', 'project_id',
                                     domain=[('stage_id.fold', '=', False)]),
         'color': fields.integer('Color Index'),
-        'alias_id': fields.many2one('mail.alias', 'Alias', ondelete="restrict", required=True,
+        'alias_id': fields.many2one('mail.alias', 'Alias', ondelete="restrict", 
                                     help="Internal email associated with this project. Incoming emails are automatically synchronized"
                                          "with Tasks (or optionally Issues if the Issue Tracker module is installed)."),
-        'alias_model': fields.selection(_alias_models, "Alias Model", select=True, required=True,
+        'alias_model': fields.selection(_alias_models, "Alias Model", select=True,
                                         help="The kind of document created when an email is received on this project's email alias"),
         'privacy_visibility': fields.selection(_visibility_selection, 'Privacy / Visibility', required=True,
             help="Holds visibility of the tasks or issues that belong to the current project:\n"

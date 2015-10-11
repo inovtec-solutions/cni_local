@@ -444,18 +444,22 @@
                    <field name="effective_hours"  position = "replace"/>
 			  	<group>
 					
+
 					<group >
 						<field name="user_id" attrs="{'readonly':[('project_types','=','Pre-Assembly')]}"/>	
 						<field name="project_planned_hours" required = "1" widget="float_time"/>
 						<field name="planned_hours" widget="float_time" groups="project.group_time_work_estimation_tasks"/>
                         <field name="effective_hours" widget="float_time" groups="project.group_time_work_estimation_tasks"/>
 	                	<field name="excel_project" invisible="1" />
+						 <field name="alias_model" invisible="1"/>
+                		 <field name="alias_contact" invisible="1"/>
 					</group>
-					<group attrs="{'readonly':[('restrict_access','=',1)]}">
-						<field name="project_location" required="1"/>
+					<group>
+						<field name="project_location" required="1" attrs="{'readonly':[('restrict_access','=',1)]}"/>
 						<field name="project_types" required="1" on_change="onchange_projecttype(project_types)" attrs="{'readonly':[('excel_project','=',True)]}"/>
-						<field name="date_start" required = "1" string="Start Date"/>
-                        <field name="date" string="End Date"/>
+						<field name="date_start" attrs="{'readonly':[('restrict_access','=',1)]}" required = "1" string="Start Date"/>
+                        <field name="date" attrs="{'readonly':[('restrict_access','=',1)]}" string="End Date"/>
+						<field name="restrict_access" invisible = "1"/>
                          
 					</group>
 	                 <group string="" attrs="{'invisible':[('project_types','!=','Pre-Assembly')],'readonly':[('project_types','=','Pre-Assembly')]}" >
@@ -481,9 +485,7 @@
 					<field name="material_ids" />
 			    	</page>
 			   </notebook>
-			   <group>
-					<field name="restrict_access"  invisible = "1"/>
-					</group>
+			  
 			  	</data>
 			  </field>	
 		    </record>
@@ -498,12 +500,13 @@
             <field name="date_deadline" position="replace"/>
             <field name="planned_hours" position="replace"/>
             <group>
-            <group>
-             <field name="planned_hours" required = "1"/>
+			 <field name="restrict_access" invisible = "1"/>
+			<group >
+			 <field name="planned_hours" attrs="{'readonly':[('restrict_access','!=',1)]}" />
             </group>
-             <group>
-             <field name="date_deadline" required = "1" />
-            <field name="override_hrs" />
+             <group >
+             <field name="date_deadline" attrs="{'readonly':[('restrict_access','!=',1)]}" />
+            <field name="override_hrs" attrs="{'readonly':[('restrict_access','!=',1)]}"/>
             </group>
              </group>
         </data>

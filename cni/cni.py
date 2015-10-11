@@ -481,18 +481,21 @@ class project_project(osv.osv):
     def is_access_restricted(self, cr, uid, ids, context={}, arg=None, obj=None):
         result = {}
         records = self.browse(cr, uid, ids)
-        sql="""select *
+        sql="""select id
                 from res_groups_users_rel
                  inner join res_groups
                 on res_groups.id=res_groups_users_rel.gid
                 where res_groups_users_rel.uid="""+str(uid)+""" and res_groups.name in ('Group CNI Technician')"""
         cr.execute(sql)
         res=cr.fetchone()
+
         for f in records:
             if res:
                 result[f.id] = True
             else:
                 result[f.id] = False
+        
+
         return result
     
     _name = 'project.project'
@@ -610,9 +613,9 @@ class project_work(osv.osv):
     
     def is_access_restricted(self, cr, uid, ids, context={}, arg=None, obj=None):
         result = {}
-        records = self.browse(cr, uid, ids, context)
-        sql="""select *
-                from res_groups_users_rel
+        records = self.browse(cr, uid, ids, context) 
+        sql="""select id
+                from inner res_groups_users_rel
                  inner res_groups
                 on res_groups.id=res_groups_users_rel.gid
                 where res_groups_users_rel.uid="""+str(uid)+""" and res_groups.name in ('Group CNI Technician')"""
@@ -741,16 +744,17 @@ res_users()
 
 class project_task(osv.osv):
     """This object inherited res_users adding a columns 'Can be assign milstone, this will filter this user'"""
-    def is_access_restricted(self, cr, uid, ids, arg=None, obj=None):
+    def is_access_restricted(self, cr, uid, ids, context={}, arg=None, obj=None):
         result = {}
         records = self.browse(cr, uid, ids)
-        sql="""select *
+        sql="""select id
                 from res_groups_users_rel
                  inner join res_groups
                 on res_groups.id=res_groups_users_rel.gid
                 where res_groups_users_rel.uid="""+str(uid)+""" and res_groups.name in ('Group CNI Technician')"""
         cr.execute(sql)
         res=cr.fetchone()
+
         for f in records:
             if res:
                 result[f.id] = True
