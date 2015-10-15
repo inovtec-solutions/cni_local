@@ -204,6 +204,42 @@
 	    </field>
 	</record>
 	
+<!--Projct generic types-->
+<record id="project_generictype_form" model="ir.ui.view">
+		<field name="name">project.generic.type.form</field>
+	    <field name="model">project.generic.type</field>
+	    <field name="arch" type="xml">
+		<form string="Projects_types">
+			<sheet string="Project Type">
+	            <group>
+	                <group>
+	                    <field name="name"/>
+						<field name="desc" />
+	                </group>
+	            </group>
+				<p>
+						<ul>
+						<li><strong>Define some Generic Project types e.g Bell, Tell Us</strong></li>
+						<li>These types will be used by project templates in for templated creatation. It is also used by user when creating new project.</li>
+						</ul>
+				</p>
+	    	</sheet>
+		</form>
+	    </field>
+    </record>
+    <record id="project_generictypes_tree" model="ir.ui.view">
+		<field name="name">project.generic.type.tree</field>
+	    <field name="model">project.generic.type</field>
+	    <field name="arch" type="xml">
+	    <tree string="Project Generic Types">
+	        <field name="name"/>
+			<field name="desc"/>
+	    </tree>
+	    </field>
+	</record>
+  
+
+
 <!--Project types in company-->
 
 	<record id="project_company_types_form" model="ir.ui.view">
@@ -215,7 +251,7 @@
 	            <group>
 	                <group>
 	                    <field name="name" invisible ="1" />
-						<field name="project_location" />
+						<field name="generic_type" />
 						
 	                </group>
 	                
@@ -239,7 +275,7 @@
 	    <field name="model">project.types</field>
 	    <field name="arch" type="xml">
 	    <tree string="Project Location">
-	        <field name="project_location"/>
+			<field name="generic_type"/>
 	    </tree>
 	    </field>
 	</record>
@@ -463,7 +499,7 @@
                 		 <field name="alias_contact" invisible="1"/>
 					</group>
 					<group>
-						<field name="project_location" required="1" attrs="{'readonly':[('restrict_access','=',1)]}"/>
+						<field name="generic_type" attrs="{'readonly':[('excel_project','=',True)]}"/>
 						<field name="project_types" required="1" on_change="onchange_projecttype(project_types)" attrs="{'readonly':[('excel_project','=',True)]}"/>
 						<field name="date_start" attrs="{'readonly':[('restrict_access','=',1)]}" required = "1" string="Start Date"/>
                         <field name="date" attrs="{'readonly':[('restrict_access','=',1)]}" string="End Date"/>

@@ -427,41 +427,38 @@ client_stock_lines()
 class project_project(osv.osv):
     """Extended project.project through inheritance"""
     
-    def load_tasks_and_activities(self,cr,uid,proj_id):
+    def load_tasks_and_activities(self,cr,uid,proj_id,project_gen_type):
         """Loads for bell projects only"""
-        project_type_id = self.pool.get('project.types').search(cr, uid, [('project_location','=','Bell')])
-        if project_type_id:
-            default_task_id = self.pool.get('project.tasks.default').search(cr, uid, [('project_id','=',project_type_id[0])])
-            if default_task_id:
-                rec_default_task = self.pool.get('project.tasks.default').browse(cr, uid,default_task_id)
-                for d_task in rec_default_task:
-                    #now create task record in project.task
-                    task_id = self.pool.get('project.task').create(cr,uid,{
-                                                'name':d_task.name,
-                                                'project_id':proj_id, 
-                                                'planned_hours':d_task.planned_hours,
-                                                'user_id':d_task.user_id.id
-                                                 })
-                    if task_id:
-                        #search default_work activities of task using default task id
-                        activity_ids = self.pool.get('project.task.work.default').search(cr, uid, [('task_id','=',d_task.id)])
-                        if activity_ids:
-                            rec_default_task = self.pool.get('project.task.work.default').browse(cr, uid,activity_ids)
-                            for activity in rec_default_task:
-                                #now create task activities
-                                self.pool.get('project.task.work').create(cr,uid,{
-                                                'name':activity.name,
-                                                'task_id':task_id, 
-                                                'user_id':activity.user_id.id,
-                                                'hours':activity.hours
-                                                 })
+        default_task_id = self.pool.get('project.tasks.default').search(cr, uid, [('project_id','=',project_gen_type)])
+        if default_task_id:
+            rec_default_task = self.pool.get('project.tasks.default').browse(cr, uid,default_task_id)
+            for d_task in rec_default_task:
+                #now create task record in project.task
+                task_id = self.pool.get('project.task').create(cr,uid,{
+                                            'name':d_task.name,
+                                            'project_id':proj_id, 
+                                            'planned_hours':d_task.planned_hours,
+                                            'user_id':d_task.user_id.id
+                                             })
+                if task_id:
+                    #search default_work activities of task using default task id
+                    activity_ids = self.pool.get('project.task.work.default').search(cr, uid, [('task_id','=',d_task.id)])
+                    if activity_ids:
+                        rec_default_task = self.pool.get('project.task.work.default').browse(cr, uid,activity_ids)
+                        for activity in rec_default_task:
+                            #now create task activities
+                            self.pool.get('project.task.work').create(cr,uid,{
+                                            'name':activity.name,
+                                            'task_id':task_id, 
+                                            'user_id':activity.user_id.id,
+                                            'hours':activity.hours
+                                             })
         return
    
     def create(self, cr, uid, vals, context=None, check=True):
         result = super(osv.osv, self).create(cr, uid, vals, context)
         for f in self.browse(cr,uid,result):
-            if f.project_location == "Bell":
-                load = self.load_tasks_and_activities(cr,uid,f.id)
+            load = self.load_tasks_and_activities(cr,uid,f.id,f.generic_type.id)
         return result
    
     
@@ -508,7 +505,7 @@ class project_project(osv.osv):
     'upload_file': fields.binary('File'),
     'project_planned_hours': fields.float('Project Hours'),
     'project_types':fields.selection([('Pre-Assembly', 'Pre-Assembly'),('General', 'General')], 'Project Location'),
-    'project_location':fields.selection([('Bell', 'Bell'),('TellUs', 'TellUs'),('Radio', 'Radio'),('Shelter', 'Shelter')], 'Project Type'),
+    'generic_type':fields.many2one('project.generic.type', 'Type', required = True),
     'consumable': fields.one2many('daily.sale.reconciliation', 'project', 'Consumable'),
     'stockable': fields.one2many('get.client.stock', 'project', 'Stockable'),
     'tools_used': fields.one2many('asset.requisition', 'project', 'Tools'),
@@ -688,18 +685,28 @@ class res_company(osv.osv):
     _name = 'res.company'
     _inherit ='res.company'
     _columns = {
-    'project_types_ids': fields.one2many('project.types', 'name', 'Assets'),
+    'project_types_ids': fields.one2many('project.types', 'name', 'Project Types'),
     
     }
 res_company()
 #---------------------------------------------------------------------------------------------------------------------------------
+
+class project_generic_type(osv.osv):
+    """This stores generic project types"""
+    _name = 'project.generic.type'
+    _columns = {
+    'name': fields.char(string = 'Name',size = 150, required =  True),
+    'desc':fields.char(string = 'desc',size = 150),
+    }
+project_generic_type()
+
 
 class project_types(osv.osv):
     """This objects stores record of tools reserved by an employee"""
     _name = 'project.types'
     _columns = {
     'name': fields.many2one('res.company', 'Types', readonly = True),
-    'project_location':fields.selection([('Bell', 'Bell'),('TellUs', 'TellUs'),('Radio', 'Radio'),('Shelter', 'Shelter')], 'Project Location'),
+    'generic_type':fields.many2one('project.generic.type', 'Type', required = True),
     'project_tasks_ids': fields.one2many('project.tasks.default', 'project_id', 'Tasks'),
     }
 project_types()
