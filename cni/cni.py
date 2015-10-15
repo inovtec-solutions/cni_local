@@ -706,7 +706,7 @@ class project_types(osv.osv):
     _name = 'project.types'
     _columns = {
     'name': fields.many2one('res.company', 'Types', readonly = True),
-    'generic_type':fields.many2one('project.generic.type', 'Type', required = True),
+    'generic_type':fields.many2one('project.generic.type', 'Template Type', required = True),
     'project_tasks_ids': fields.one2many('project.tasks.default', 'project_id', 'Tasks'),
     }
 project_types()
@@ -746,7 +746,7 @@ class project_tasks_default(osv.osv):
     
     _name = 'project.tasks.default'
     _columns = {
-    'name': fields.char('Task',size = 100,required = True),
+    'name': fields.char('Task(Template)',size = 100,required = True),
     'planned_hours': fields.float('Initially Planned Hours', help='Estimated time to do the task, usually set by the project manager when the task is in draft state.'),
     'project_id': fields.many2one('project.types', 'Types'),
     'project_stage':fields.char('Stage',size = 150),

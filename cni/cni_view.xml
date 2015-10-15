@@ -262,7 +262,7 @@
 						user select a particular project type .</p>
 	                </group>
 	            <notebook>
-	                <page string="Tasks" >
+	                <page string="Tasks Templates" >
 	                	<field name="project_tasks_ids"/>
 	                </page>
 	            </notebook>
@@ -306,7 +306,7 @@
 							<li>Assign exptect user and time required for each task and its activities.</li>
 						  </ul></p>		 
 				 <notebook>
-	                <page string="Tasks Activities" >
+	                <page string="Tasks Activities " >
 	                	<field name="project_task_work_ids" nolabel = "1"/>
 	                </page>
 	            </notebook>
@@ -585,7 +585,8 @@
 		      <field name="rml_header3">
 			  	</field>
 				<notebook>
-					<page string = "Project Types">
+					<page string = "Project Templates">
+					<p color ="Blue">Define Project Templates for Following project types, if project types doesnot exist, create one</p>
 					<field name="project_types_ids"/>
 			    	</page>
 			   </notebook>
