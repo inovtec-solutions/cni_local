@@ -233,13 +233,14 @@ class daily_sale_reconciliation(osv.osv):
         rows=cr.fetchall() 
         for id in  rows:
             result.append(id[0]) 
-        res = {'domain': {'employee': [('id', 'in', result)]}}
+        res = {'domain': {'employee': [('id', 'in', result)],'project': [('project_id', '=',project_id)]}}
         return res
     
     _name = "daily.sale.reconciliation"
     _columns = {
         'name': fields.char('Name', size=64),
         'project':  fields.many2one('project.project', 'Project', required=True, ondelete='restrict'),
+        'task_id':  fields.many2one('project.task', 'Task', required=True, ondelete='restrict'),
         'employee':  fields.many2one('res.users', 'Technician',required=True, ondelete='restrict'),
         'date_dispatched':  fields.date('Date',required=True),
         'date_confirmed':  fields.date('Date Confirm',readonly=True),
@@ -355,7 +356,7 @@ class get_client_stock(osv.osv):
     _name = "get.client.stock"
     _columns = {
         'name': fields.char('Name', size=64),
-        'project':  fields.many2one('project.project', 'Project', required=True, ondelete='restrict'),
+        'project':  fields.many2one('project.project', 'Project', readonly=True, ondelete='restrict'),
         'partner_id': fields.many2one('res.partner', 'Client'),
         'date_received':  fields.date('Date',required=True),
         'location_id': fields.many2one('stock.location', 'Warehouse', required=True, domain=[('usage','<>','view')]),
@@ -704,7 +705,38 @@ class project_types(osv.osv):
 project_types()
 
 class project_tasks_default(osv.osv):
+    
     """"""
+    
+    def check_hour_exceed(self, cr, uid, task_id,task_name,task_hours):
+        
+        work_hrs = 0
+        work_ids = self.pool.get('project.task.work.default').search(cr, uid, [('task_id','=',task_id)])
+        if work_ids:
+            rec_w = self.pool.get('project.task.work.default').browse(cr, uid, task_id)
+            for w in rec_w:
+                work_hrs = work_hrs + w.hours
+            if work_hrs > task_hours:
+               raise osv.except_osv(('Hours Exceeds'),("Sum of work hours in  Task "+str(task_name)+" Exceeds than Task planed hours\n Go to Task " +str(task_name)+" and reset its activity hours."))
+            else:
+                return False
+    
+    def write(self, cr, uid, ids, vals, context=None, check=True, update_check=True):
+        
+        hours_exceeds = True
+        for f in self.browse(cr, uid, ids):
+            hours_exceeds = self.check_hour_exceed(cr, uid, ids[0],f.name,f.planned_hours)
+        if not hours_exceeds:
+            result = super(osv.osv, self).write(cr, uid, ids, vals, context)
+        else:
+            result = False
+        return result
+    
+    def create(self, cr, uid, vals, context=None, check=True):
+        result = super(osv.osv, self).create(cr, uid, vals, context)
+        hours_exceeds = self.check_hour_exceed(cr, uid, result,vals['name'],vals['planned_hours'])
+        return result
+    
     _name = 'project.tasks.default'
     _columns = {
     'name': fields.char('Task',size = 100,required = True),
@@ -712,7 +744,7 @@ class project_tasks_default(osv.osv):
     'project_id': fields.many2one('project.types', 'Types'),
     'project_stage':fields.char('Stage',size = 150),
     'project_task_work_ids': fields.one2many('project.task.work.default', 'task_id', 'Task Activity'),
-    'user_id': fields.many2one('res.users', 'Done by', required=True),
+    'user_id': fields.many2one('res.users', 'Done by'),
     }
 project_tasks_default()
 
@@ -722,7 +754,7 @@ class project_task_work_default(osv.osv):
     _columns = {
     'task_id': fields.many2one('project.tasks.default', 'Task'),
     'name':fields.char('Activity',size = 150,required=True,),
-    'user_id': fields.many2one('res.users', 'Will be Assigned to', required=True),
+    'user_id': fields.many2one('res.users', 'Will be Assigned to'),
     'hours': fields.float('Time to be Spent'),
     }
 project_task_work_default()
@@ -769,6 +801,7 @@ class project_task(osv.osv):
     _columns = {
         'user_id': fields.many2one('res.users', 'Assigned to', domain=[('work_on_task', '=',True)], select=True, track_visibility='onchange'),
         'override_hrs':fields.boolean('Override Task Hours'),
+        'consumable_products_ids': fields.one2many('daily.sale.reconciliation', 'task_id', 'Stockables'),
         'restrict_access':fields.function(is_access_restricted, method=True, string='Restrict Access',type='boolean'),
             }
 

@@ -127,7 +127,8 @@
 	            <group>
 				
 				<group attrs="{'readonly':[('state','!=','Draft')]}">
-					<field name="project" on_change="onchange_project(project)" />
+					<field name="project"  on_change="onchange_project(project)"  />
+					 <field name="task_id" />
 					<field name="date_dispatched" />
 					<field name="employee" />
 				</group>
@@ -214,15 +215,16 @@
 	            <group>
 	                <group>
 	                    <field name="name" invisible ="1" />
-						<h1><field name="project_location" /></h1>
+						<field name="project_location" />
 						
 	                </group>
-	                <group>
-						<p>Select a project location and define its task and activities. 
-						Task associated with each project type will be auto loaded at project creation when
-						user select a particular project location .</p>
-	                </group>
+	                
 	            </group>
+				<group>
+						<p>Select a project type and define its task and activities. 
+						Task associated with each project type will be auto loaded at project creation when
+						user select a particular project type .</p>
+	                </group>
 	            <notebook>
 	                <page string="Tasks" >
 	                	<field name="project_tasks_ids"/>
@@ -252,16 +254,22 @@
 			<sheet string="Project Tasks">
 	            <group>
 	                <group>
-	                   <h1><field name="name" readonly = "1" nolabel = "1"/></h1>
-	                   <field name="name" nolabel = "1"/>
+	                  <field name="name" required = "1" />
+					 <field name="project_id" readonly = "1" />	
 	                </group>
 	                 <group>
 	                   <field name="planned_hours" widget="float_time" />
-						<field name="project_id" readonly = "1" />
 						<field name="user_id" />
 	                </group>
+			    
 	            </group>
-	            <notebook>
+	            <p><ul>
+							<li>Initially planned hours should not exceed project total hours.</li>
+							<li>Each Task belongs to a project type shown above.</li>
+							<li>After giving a task name, define task activities in the following list.</li>
+							<li>Assign exptect user and time required for each task and its activities.</li>
+						  </ul></p>		 
+				 <notebook>
 	                <page string="Tasks Activities" >
 	                	<field name="project_task_work_ids" nolabel = "1"/>
 	                </page>
@@ -475,9 +483,6 @@
 					<page string = "Stockables">
 					<field name="stockable" readonly="1"/>
 			    	</page>
-					<page string = "Material">
-					<field name="consumable" readonly="1"/>
-			    	</page>
 					<page string = "Tools">
 					<field name="tools_used" readonly="1"/>
 			    	</page>
@@ -509,9 +514,15 @@
             <field name="override_hrs" attrs="{'readonly':[('restrict_access','!=',1)]}"/>
             </group>
              </group>
+			 <notebook>
+					<page string = "Material">
+					<field name="consumable_products_ids" readonly="1"/>
+			    	</page>
+			   </notebook>
         </data>
     </field>
 </record>
+
 
 <!--Project inherited for projectmanager invisibly on slection-->
 <record model="ir.ui.view" id="inherit_res_users_form1">
