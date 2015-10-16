@@ -205,12 +205,12 @@
 	</record>
 	
 <!--Projct generic types-->
-<record id="project_generictype_form" model="ir.ui.view">
-		<field name="name">project.generic.type.form</field>
-	    <field name="model">project.generic.type</field>
+<record id="project_generictemplate_form" model="ir.ui.view">
+		<field name="name">project.generic.template.form</field>
+	    <field name="model">project.generic.template</field>
 	    <field name="arch" type="xml">
 		<form string="Projects_types">
-			<sheet string="Project Type">
+			<sheet string="Project Template">
 	            <group>
 	                <group>
 	                    <field name="name"/>
@@ -219,68 +219,43 @@
 	            </group>
 				<p>
 						<ul>
-						<li><strong>Define some Generic Project types e.g Bell, Tell Us</strong></li>
-						<li>These types will be used by project templates in for templated creatation. It is also used by user when creating new project.</li>
+						<li><strong>Define some Generic Project templates e.g Bell, Tell Us</strong></li>
+						<li>. It is used by user when creating new project.</li>
 						</ul>
 				</p>
+			<notebook>
+				<page string = "Tasks">
+				<field name="default_task_ids" nolabel = "1" />
+				</page>
+			</notebook>
 	    	</sheet>
 		</form>
 	    </field>
     </record>
     <record id="project_generictypes_tree" model="ir.ui.view">
-		<field name="name">project.generic.type.tree</field>
-	    <field name="model">project.generic.type</field>
+		<field name="name">project.generic.template.tree</field>
+	    <field name="model">project.generic.template</field>
 	    <field name="arch" type="xml">
-	    <tree string="Project Generic Types">
+	    <tree string="Project Generic Templates">
 	        <field name="name"/>
 			<field name="desc"/>
 	    </tree>
 	    </field>
 	</record>
-  
 
+<record id="action_generic_projects_templates" model="ir.actions.act_window">
+	    <field name="name">Project Template Types</field>
+	    <field name="res_model">project.generic.template</field>
+	    <field name="view_type">form</field>
+		<field name="view_mode">tree,form</field>
+	    <field name="help" type="html">
+	    	<p class="oe_view_nocontent_create">
+	        Click to /add New Project Template.
+	      	</p>
+			
+	    </field>	
+	</record>  
 
-<!--Project types in company-->
-
-	<record id="project_company_types_form" model="ir.ui.view">
-		<field name="name">project.types.form</field>
-	    <field name="model">project.types</field>
-	    <field name="arch" type="xml">
-		<form string="Projects_types">
-			<sheet string="Project Types">
-	            <group>
-	                <group>
-	                    <field name="name" invisible ="1" />
-						<field name="generic_type" />
-						
-	                </group>
-	                
-	            </group>
-				<group>
-						<p>Select a project type and define its task and activities. 
-						Task associated with each project type will be auto loaded at project creation when
-						user select a particular project type .</p>
-	                </group>
-	            <notebook>
-	                <page string="Tasks Templates" >
-	                	<field name="project_tasks_ids"/>
-	                </page>
-	            </notebook>
-	    	</sheet>
-		</form>
-	    </field>
-    </record>
-    <record id="project_location_tree" model="ir.ui.view">
-		<field name="name">project.types.tree</field>
-	    <field name="model">project.types</field>
-	    <field name="arch" type="xml">
-	    <tree string="Project Location">
-			<field name="generic_type"/>
-	    </tree>
-	    </field>
-	</record>
-    
-    
     
     <record id="project_default_tasks_form" model="ir.ui.view">
 		<field name="name">project.tasks.default.form</field>
@@ -291,11 +266,11 @@
 	            <group>
 	                <group>
 	                  <field name="name" required = "1" />
-					 <field name="project_id" readonly = "1" />	
+					 <field name="project_template_id" readonly = "1" />	
 	                </group>
 	                 <group>
 	                   <field name="planned_hours" widget="float_time" />
-						<field name="user_id" />
+						<field name="user_id" required = "1" />
 	                </group>
 			    
 	            </group>
@@ -321,7 +296,7 @@
 	    <field name="arch" type="xml">
 	    <tree string="Tasks">
 	        <field name="name"/>
-	        <field name="user_id"/>
+	        <field name="user_id" invisible = "1"/>
 	         <field name="planned_hours"/>
 	    </tree>
 	    </field>
@@ -499,7 +474,7 @@
                 		 <field name="alias_contact" invisible="1"/>
 					</group>
 					<group>
-						<field name="generic_type" attrs="{'readonly':[('excel_project','=',True)]}"/>
+						<field name="project_type_template" attrs="{'readonly':[('excel_project','=',True)]}"/>
 						<field name="project_types" required="1" on_change="onchange_projecttype(project_types)" attrs="{'readonly':[('excel_project','=',True)]}"/>
 						<field name="date_start" attrs="{'readonly':[('restrict_access','=',1)]}" required = "1" string="Start Date"/>
                         <field name="date" attrs="{'readonly':[('restrict_access','=',1)]}" string="End Date"/>
@@ -575,25 +550,6 @@
     </record>
 
 	
-<!--Company inherited-->
-<record model="ir.ui.view" id="inherit_res_company_form">
-		      <field name="name">res.company.inherit</field>
-		      <field name="model">res.company</field>
-		      <field name="inherit_id" ref="base.view_company_form"/>
-		      <field name="type">form</field>
-		      <field name="arch" type="xml">
-		      <field name="rml_header3">
-			  	</field>
-				<notebook>
-					<page string = "Project Templates">
-					<p color ="Blue">Define Project Templates for Following project types, if project types doesnot exist, create one</p>
-					<field name="project_types_ids"/>
-			    	</page>
-			   </notebook>
-		      </field>
-		    </record>
-
-
 <!--Employee inherited-->
 
 		<record model="ir.ui.view" id="inherit_employee_form">

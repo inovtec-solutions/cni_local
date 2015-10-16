@@ -429,40 +429,44 @@ class project_project(osv.osv):
     
     def load_tasks_and_activities(self,cr,uid,proj_id,project_gen_type):
         """Loads for bell projects only"""
-        template_id = self.pool.get('project.types').search(cr, uid, [('generic_type','=',project_gen_type)])
-        if template_id:
-            default_task_id = self.pool.get('project.tasks.default').search(cr, uid, [('project_id','=',template_id)])
-            if default_task_id:
-                rec_default_task = self.pool.get('project.tasks.default').browse(cr, uid,default_task_id)
-                for d_task in rec_default_task:
-                    #now create task record in project.task
-                    task_id = self.pool.get('project.task').create(cr,uid,{
-                                                'name':d_task.name,
-                                                'project_id':proj_id, 
-                                                'planned_hours':d_task.planned_hours,
-                                                'user_id':d_task.user_id.id
-                                                 })
-                    if task_id:
-                        #search default_work activities of task using default task id
-                        activity_ids = self.pool.get('project.task.work.default').search(cr, uid, [('task_id','=',d_task.id)])
-                        if activity_ids:
-                            rec_default_task = self.pool.get('project.task.work.default').browse(cr, uid,activity_ids)
-                            for activity in rec_default_task:
-                                #now create task activities
-                                self.pool.get('project.task.work').create(cr,uid,{
-                                                'name':activity.name,
-                                                'task_id':task_id, 
-                                                'user_id':activity.user_id.id,
-                                                'hours':activity.hours
-                                                 })
+        
+        default_task_id = self.pool.get('project.tasks.default').search(cr, uid, [('project_template_id','=',project_gen_type)])
+        if default_task_id:
+            rec_default_task = self.pool.get('project.tasks.default').browse(cr, uid,default_task_id)
+            for d_task in rec_default_task:
+                #now create task record in project.task
+                task_id = self.pool.get('project.task').create(cr,uid,{
+                                            'name':d_task.name,
+                                            'project_id':proj_id, 
+                                            'planned_hours':d_task.planned_hours,
+                                            'user_id':d_task.user_id.id
+                                             })
+                if task_id:
+                    #search default_work activities of task using default task id
+                    activity_ids = self.pool.get('project.task.work.default').search(cr, uid, [('task_id','=',d_task.id)])
+                    if activity_ids:
+                        rec_default_task = self.pool.get('project.task.work.default').browse(cr, uid,activity_ids)
+                        for activity in rec_default_task:
+                            #now create task activities
+                            self.pool.get('project.task.work').create(cr,uid,{
+                                            'name':activity.name,
+                                            'task_id':task_id, 
+                                            'user_id':9,
+                                            'hours':activity.hours
+                                             })
         return
    
     def create(self, cr, uid, vals, context=None, check=True):
         result = super(osv.osv, self).create(cr, uid, vals, context)
         for f in self.browse(cr,uid,result):
-            load = self.load_tasks_and_activities(cr,uid,f.id,f.generic_type.id)
+            load = self.load_tasks_and_activities(cr,uid,f.id,f.project_type_template.id)
         return result
    
+    def write(self, cr, uid, ids, vals, context=None, check=True, update_check=True):
+        for f in self.browse(cr,uid,ids):
+            self.load_tasks_and_activities(cr,uid,f.id,f.project_type_template.id)
+        result = super(osv.osv, self).write(cr, uid, ids, vals, context)
+        return result
     
     def unlink(self, cr, uid, ids, context=None):
         raise osv.except_osv(('Not Allowed'),("Project once created, cannot be deleted, Contact your service provider."))
@@ -507,7 +511,7 @@ class project_project(osv.osv):
     'upload_file': fields.binary('File'),
     'project_planned_hours': fields.float('Project Hours'),
     'project_types':fields.selection([('Pre-Assembly', 'Pre-Assembly'),('General', 'General')], 'Project Location'),
-    'generic_type':fields.many2one('project.generic.type', 'Type', required = True),
+    'project_type_template':fields.many2one('project.generic.template', 'Type', required = True),
     'consumable': fields.one2many('daily.sale.reconciliation', 'project', 'Consumable'),
     'stockable': fields.one2many('get.client.stock', 'project', 'Stockable'),
     'tools_used': fields.one2many('asset.requisition', 'project', 'Tools'),
@@ -682,36 +686,21 @@ emp_tools_reservation()
 
 #---------------------------------------------------------------------------------------------------------
 
-class res_company(osv.osv):
-    """Extended company through inheritance"""
-    _name = 'res.company'
-    _inherit ='res.company'
-    _columns = {
-    'project_types_ids': fields.one2many('project.types', 'name', 'Project Types'),
-    
-    }
-res_company()
+
 #---------------------------------------------------------------------------------------------------------------------------------
 
-class project_generic_type(osv.osv):
-    """This stores generic project types"""
-    _name = 'project.generic.type'
+class project_generic_template(osv.osv):
+    """This stores generic project templates"""
+    _name = 'project.generic.template'
     _columns = {
     'name': fields.char(string = 'Name',size = 150, required =  True),
-    'desc':fields.char(string = 'desc',size = 150),
+    'desc':fields.char(string = 'Desc',size = 150),
+    'default_task_ids':fields.one2many('project.tasks.default','project_template_id','Tasks')
     }
-project_generic_type()
+project_generic_template()
 
 
-class project_types(osv.osv):
-    """This objects stores record of tools reserved by an employee"""
-    _name = 'project.types'
-    _columns = {
-    'name': fields.many2one('res.company', 'Types', readonly = True),
-    'generic_type':fields.many2one('project.generic.type', 'Template Type', required = True),
-    'project_tasks_ids': fields.one2many('project.tasks.default', 'project_id', 'Tasks'),
-    }
-project_types()
+
 
 class project_tasks_default(osv.osv):
     
@@ -750,7 +739,7 @@ class project_tasks_default(osv.osv):
     _columns = {
     'name': fields.char('Task(Template)',size = 100,required = True),
     'planned_hours': fields.float('Initially Planned Hours', help='Estimated time to do the task, usually set by the project manager when the task is in draft state.'),
-    'project_id': fields.many2one('project.types', 'Types'),
+    'project_template_id': fields.many2one('project.generic.template', 'Project'),
     'project_stage':fields.char('Stage',size = 150),
     'project_task_work_ids': fields.one2many('project.task.work.default', 'task_id', 'Task Activity'),
     'user_id': fields.many2one('res.users', 'Done by'),
