@@ -55,7 +55,7 @@ class cni_import_project_data(osv.osv_memory):
                         'name': project_id_excel,
                         'network_id': network,
                         'excel_project': True,
-                        'manager_id': None,
+                        'user_id': None,
                         'partner_id': res_partner,
                         'project_types': 'Pre-Assembly',
                         'project_id': project_id_excel,
