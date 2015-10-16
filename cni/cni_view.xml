@@ -334,7 +334,7 @@
 	    
 			<sheet string="Add Clinet stock">
 	            <div class="oe_title">
-	            <h2>Client Sock</h2>    
+	            <h2>Client Stock</h2>    
 				<p>Add Client material to existing stock,Use the same form to handover back to client </p>
 	            </div>
 	            <group>
@@ -474,7 +474,7 @@
                 		 <field name="alias_contact" invisible="1"/>
 					</group>
 					<group>
-						<field name="project_type_template" attrs="{'readonly':[('excel_project','=',True)]}"/>
+						<field name="project_type_template" />
 						<field name="project_types" required="1" on_change="onchange_projecttype(project_types)" attrs="{'readonly':[('excel_project','=',True)]}"/>
 						<field name="date_start" attrs="{'readonly':[('restrict_access','=',1)]}" required = "1" string="Start Date"/>
                         <field name="date" attrs="{'readonly':[('restrict_access','=',1)]}" string="End Date"/>

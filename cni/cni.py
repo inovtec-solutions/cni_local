@@ -457,6 +457,7 @@ class project_project(osv.osv):
         return
    
     def create(self, cr, uid, vals, context=None, check=True):
+        vals['template_loaded'] = True
         result = super(osv.osv, self).create(cr, uid, vals, context)
         for f in self.browse(cr,uid,result):
             load = self.load_tasks_and_activities(cr,uid,f.id,f.project_type_template.id)
@@ -464,7 +465,9 @@ class project_project(osv.osv):
    
     def write(self, cr, uid, ids, vals, context=None, check=True, update_check=True):
         for f in self.browse(cr,uid,ids):
-            self.load_tasks_and_activities(cr,uid,f.id,f.project_type_template.id)
+            if not f.template_loaded:
+                self.load_tasks_and_activities(cr,uid,f.id,f.project_type_template.id)
+                vals['template_loaded'] = True
         result = super(osv.osv, self).write(cr, uid, ids, vals, context)
         return result
     
@@ -523,6 +526,7 @@ class project_project(osv.osv):
     'network_id': fields.char('Network', size=64),
     'wbs': fields.char('WBS', size=64),
     'site_code': fields.date('Site Code'),
+    'template_loaded':fields.boolean("Template Loaded"),
     'status': fields.char('SC Status', size=64),
     }
     _defaults = {
