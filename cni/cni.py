@@ -429,30 +429,32 @@ class project_project(osv.osv):
     
     def load_tasks_and_activities(self,cr,uid,proj_id,project_gen_type):
         """Loads for bell projects only"""
-        default_task_id = self.pool.get('project.tasks.default').search(cr, uid, [('project_id','=',project_gen_type)])
-        if default_task_id:
-            rec_default_task = self.pool.get('project.tasks.default').browse(cr, uid,default_task_id)
-            for d_task in rec_default_task:
-                #now create task record in project.task
-                task_id = self.pool.get('project.task').create(cr,uid,{
-                                            'name':d_task.name,
-                                            'project_id':proj_id, 
-                                            'planned_hours':d_task.planned_hours,
-                                            'user_id':d_task.user_id.id
-                                             })
-                if task_id:
-                    #search default_work activities of task using default task id
-                    activity_ids = self.pool.get('project.task.work.default').search(cr, uid, [('task_id','=',d_task.id)])
-                    if activity_ids:
-                        rec_default_task = self.pool.get('project.task.work.default').browse(cr, uid,activity_ids)
-                        for activity in rec_default_task:
-                            #now create task activities
-                            self.pool.get('project.task.work').create(cr,uid,{
-                                            'name':activity.name,
-                                            'task_id':task_id, 
-                                            'user_id':activity.user_id.id,
-                                            'hours':activity.hours
-                                             })
+        template_id = self.pool.get('project.types').search(cr, uid, [('generic_type','=',project_gen_type)])
+        if template_id:
+            default_task_id = self.pool.get('project.tasks.default').search(cr, uid, [('project_id','=',template_id)])
+            if default_task_id:
+                rec_default_task = self.pool.get('project.tasks.default').browse(cr, uid,default_task_id)
+                for d_task in rec_default_task:
+                    #now create task record in project.task
+                    task_id = self.pool.get('project.task').create(cr,uid,{
+                                                'name':d_task.name,
+                                                'project_id':proj_id, 
+                                                'planned_hours':d_task.planned_hours,
+                                                'user_id':d_task.user_id.id
+                                                 })
+                    if task_id:
+                        #search default_work activities of task using default task id
+                        activity_ids = self.pool.get('project.task.work.default').search(cr, uid, [('task_id','=',d_task.id)])
+                        if activity_ids:
+                            rec_default_task = self.pool.get('project.task.work.default').browse(cr, uid,activity_ids)
+                            for activity in rec_default_task:
+                                #now create task activities
+                                self.pool.get('project.task.work').create(cr,uid,{
+                                                'name':activity.name,
+                                                'task_id':task_id, 
+                                                'user_id':activity.user_id.id,
+                                                'hours':activity.hours
+                                                 })
         return
    
     def create(self, cr, uid, vals, context=None, check=True):
@@ -582,11 +584,11 @@ class project_work(osv.osv):
                 for spent_hour in work_rec:
                     total_spent_hrs = total_spent_hrs + spent_hour.hours
                 #compare
-                if float(planned_hours - total_spent_hrs) < vals['hours'] and not override_limit:
-                    warning = "This Task has total hours "+str(planned_hours - total_spent_hrs)," (Out of  " +str(planned_hours)+") Avaible.\n Your work hours must be not greater than "+str(planned_hours - total_spent_hrs)+"\n"+str(vals['hours'])+"Can't be accumudated.  "
-                    raise osv.except_osv(('Work Hour Exceeds'),('Reset Spent Hours'))
-                else:
-                    return True
+#                 if float(planned_hours - total_spent_hrs) < vals['hours'] and not override_limit:
+#                     warning = "This Task has total hours "+str(planned_hours - total_spent_hrs)," (Out of  " +str(planned_hours)+") Avaible.\n Your work hours must be not greater than "+str(planned_hours - total_spent_hrs)+"\n"+str(vals['hours'])+"Can't be accumudated.  "
+#                     raise osv.except_osv(('Work Hour Exceeds'),('Reset Spent Hours'))
+#                 else:
+#                     return True
         return 
     
     def create(self, cr, uid, vals, context=None, check=True):
