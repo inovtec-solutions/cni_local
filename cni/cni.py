@@ -456,11 +456,14 @@ class project_project(osv.osv):
                                              })
         return
    
-    def create(self, cr, uid, vals, context=None, check=True):
-        vals['template_loaded'] = True
-        result = super(osv.osv, self).create(cr, uid, vals, context)
+    def create(self, cr, uid, vals, context=None, check=False):
+        
+        result = super(project_project, self).create(cr, uid, vals, context)
+        
         for f in self.browse(cr,uid,result):
-            load = self.load_tasks_and_activities(cr,uid,f.id,f.project_type_template.id)
+            if not f.template_loaded:
+                vals['template_loaded'] = True
+                load = self.load_tasks_and_activities(cr,uid,f.id,f.project_type_template.id)
         return result
    
     def write(self, cr, uid, ids, vals, context=None, check=True, update_check=True):
@@ -468,7 +471,7 @@ class project_project(osv.osv):
             if not f.template_loaded:
                 self.load_tasks_and_activities(cr,uid,f.id,f.project_type_template.id)
                 vals['template_loaded'] = True
-        result = super(osv.osv, self).write(cr, uid, ids, vals, context)
+        result = super(project_project, self).write(cr, uid, ids, vals, context)
         return result
     
     def unlink(self, cr, uid, ids, context=None):
