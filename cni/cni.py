@@ -461,16 +461,15 @@ class project_project(osv.osv):
         result = super(project_project, self).create(cr, uid, vals, context)
         
         for f in self.browse(cr,uid,result):
-            if not f.template_loaded:
-                vals['template_loaded'] = True
-                load = self.load_tasks_and_activities(cr,uid,f.id,f.project_type_template.id)
+            vals['template_loaded'] = True
+            load = self.load_tasks_and_activities(cr,uid,f.id,f.project_type_template.id)
         return result
    
     def write(self, cr, uid, ids, vals, context=None, check=True, update_check=True):
         for f in self.browse(cr,uid,ids):
-            if not f.template_loaded:
-                self.load_tasks_and_activities(cr,uid,f.id,f.project_type_template.id)
-                vals['template_loaded'] = True
+            if 'project_type_template' in vals:
+                    self.load_tasks_and_activities(cr,uid,f.id,vals['project_type_template'])
+                    vals['template_loaded'] = True
         result = super(project_project, self).write(cr, uid, ids, vals, context)
         return result
     
