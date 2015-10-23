@@ -479,7 +479,7 @@ class project_project(osv.osv):
         if admin:
             result = super(project_project, self).unlink(cr, uid, ids, context)
         else:
-            raise osv.except_osv(('Not Allowed'),("Project once created, cannot be deleted, Contact your service provider."))
+            raise osv.except_osv(('Not Allowed'),("You are not authorized to delete project, Contact your service provider."))
         return result
     
     def onchange_projecttype(self, cr, uid, ids,type):
