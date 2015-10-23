@@ -601,5 +601,27 @@
             <field name="name">My Profile</field>
         </record>
 
+<!--Timesheet_sheet-->
+
+
+		<record model="ir.ui.view" id="inherit_timesheet_sheet_form">
+		      <field name="name">hr_timesheet_sheet.form.inherited</field>
+		      <field name="model">hr_timesheet_sheet.sheet</field>
+		      <field name="inherit_id" ref="hr_timesheet_sheet.hr_timesheet_sheet_form"/>
+		      <field name="type">form</field>
+		      <field name="arch" type="xml">
+			  	<data>
+                   <field name="date_from" position = "replace" />
+                   <field name="date_to"  position = "replace"/>
+				    <group >
+				   <group >
+				   <field name="date_from" required = "1" on_change="onchange_date(date_from,'compare_date_from')" />
+                   <field name="date_to" required = "1" on_change="onchange_date(date_from,'compare_date_to')" />
+				   </group>
+				   </group>
+			  	</data>
+			  </field>	
+		</record>
+
 </data>
 </openerp>

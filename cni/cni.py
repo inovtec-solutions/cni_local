@@ -474,8 +474,13 @@ class project_project(osv.osv):
         return result
     
     def unlink(self, cr, uid, ids, context=None):
-        raise osv.except_osv(('Not Allowed'),("Project once created, cannot be deleted, Contact your service provider."))
-        return 
+        result = False
+        admin = self.check_user_group(cr,uid,'CNI Admin')
+        if admin:
+            result = super(project_project, self).unlink(cr, uid, ids, context)
+        else:
+            raise osv.except_osv(('Not Allowed'),("Project once created, cannot be deleted, Contact your service provider."))
+        return result
     
     def onchange_projecttype(self, cr, uid, ids,type):
         vals = {}
@@ -486,6 +491,19 @@ class project_project(osv.osv):
             return { 'value':vals  }
         else:
             return {} 
+    
+    def check_user_group(self, cr, uid,required_group):
+        sql="""select id
+                from res_groups 
+                inner join res_groups_users_rel
+                on res_groups.id=res_groups_users_rel.gid
+                where res_groups_users_rel.uid="""+str(uid)+""" and res_groups.name = '"""+str(required_group)+"""'"""
+        cr.execute(sql)
+        res=cr.fetchone()
+        if res:
+            return res[0]
+        else:
+            return False
     
     def is_access_restricted(self, cr, uid, ids, context={}, arg=None, obj=None):
         result = {}
@@ -619,7 +637,6 @@ class project_work(osv.osv):
         result = super(osv.osv, self).unlink(cr, uid, ids, context)
         return result 
     
-    """This object inherites project_task_work object ony one filed is change work summary of acutal module is change to task summary"""
     
     def is_access_restricted(self, cr, uid, ids, context={}, arg=None, obj=None):
         result = {}
@@ -811,6 +828,33 @@ class project_task(osv.osv):
 
 project_task()
 
+#---------------------------------- time sheeet --------------------------------------------------------------------------------------------------------
 
+class hr_timesheet_sheet(osv.osv):
+    _name = "hr_timesheet_sheet.sheet"
+    _inherit = "hr_timesheet_sheet.sheet"
+    _description="Timesheet"
+    
+    def onchange_date(self, cr, uid, ids, this_date,choice):
+        """it received from amd to date from timesheet"""
+        print "this date",this_date
+        print "today", datetime.date.today()
+        vals = {}
+        if choice == 'compare_date_from':
+            if this_date:
+                if str(this_date) > str(datetime.date.today()):
+                    vals['date_from'] = None
+        elif choice == 'compare_date_to':
+            if str(this_date) > str(datetime.date.today()):
+                vals['date_to'] = None
+        return {'value':vals}
+    
+    _columns = {}
+    _defaults = {
+        'date_from' : '',
+        'date_to' : '',
+    }
+
+hr_timesheet_sheet()
   #-------------------------------------------------------------------------------------------------------------------------
   

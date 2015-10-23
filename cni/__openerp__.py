@@ -35,7 +35,7 @@ Main Features
 * Add New Project
 * Manage Inventory
 """,
-    'depends' : ['base','purchase','project','asset'],
+    'depends' : ['base','purchase','project','asset','hr_timesheet_sheet'],
     'data' : [
         'security/cni_security.xml',
         'security/ir.model.access.csv',
