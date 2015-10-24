@@ -429,6 +429,7 @@ class project_project(osv.osv):
     
     def load_tasks_and_activities(self,cr,uid,proj_id,project_gen_type):
         """Loads for bell projects only"""
+        rec_project_template = self.pool.get('project.generic.template').browse(cr, uid,project_gen_type)
         
         default_task_id = self.pool.get('project.tasks.default').search(cr, uid, [('project_template_id','=',project_gen_type)])
         if default_task_id:
@@ -439,7 +440,7 @@ class project_project(osv.osv):
                                             'name':d_task.name,
                                             'project_id':proj_id, 
                                             'planned_hours':d_task.planned_hours,
-                                            'user_id':d_task.user_id.id
+                                            'user_id':rec_project_template.users_id.id
                                              })
                 if task_id:
                     #search default_work activities of task using default task id
@@ -451,7 +452,7 @@ class project_project(osv.osv):
                             self.pool.get('project.task.work').create(cr,uid,{
                                             'name':activity.name,
                                             'task_id':task_id, 
-                                            'user_id':9,
+                                            'user_id':rec_project_template.users_id.id,
                                             'hours':activity.hours
                                              })
         return
@@ -718,7 +719,8 @@ class project_generic_template(osv.osv):
     _columns = {
     'name': fields.char(string = 'Name',size = 150, required =  True),
     'desc':fields.char(string = 'Desc',size = 150),
-    'default_task_ids':fields.one2many('project.tasks.default','project_template_id','Tasks')
+    'default_task_ids':fields.one2many('project.tasks.default','project_template_id','Tasks'),
+    'default_users':fields.many2one('res.users','Default Worker')
     }
 project_generic_template()
 
