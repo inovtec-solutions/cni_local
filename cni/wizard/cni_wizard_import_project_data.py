@@ -28,7 +28,7 @@ class cni_import_project_data(osv.osv_memory):
             project_id_excel = str(worksheet.cell_value(row, 2))
             project_id_excel = project_id_excel.strip()
             
-            #_logger.info("___________________________Row No: %r", row)
+            _logger.info("________________________ %r out of %r________________________", row, len(rows))
             
             if project_id_excel == "":
                 row += 1    
