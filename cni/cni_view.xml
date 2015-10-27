@@ -24,31 +24,34 @@
 		<form string="Tools">
 			<header>
 	            <button name="send_request" string="Send" type="object" states="Draft" class="oe_highlight" groups="base.group_user"/>
-	            <button name="approve_request" string="Approve" type="object" states="Open" groups="base.group_user"/>
-				<button name="return_asset" string="Reutrn Tool" confirm = "Are you sure tool is returned back by employee?" type="object" states="Approved" groups="base.group_user"/>
-				<button name="cancelled_request" string="Cancel" type="object" states="Draft,Open," groups="base.group_user"/>
-	        	<field name="state" widget="statusbar" statusbar_visible=",Draft,Open,Close,Cancel" statusbar_colors='{"Cancel":"red"}' readonly="1"/>
+	            <button name="approve_request" string="Approve" type="object" states="Waiting" groups="base.group_user"/>
+	            <button name="set_draft" string="Set to Draft" type="object" states="Waiting" groups="base.group_user"/>
+				<button name="return_asset"  string="Reutrn Tool" confirm = "Are you sure tool is returned back by employee?" type="object" states="Approved" groups="base.group_user"/>
+				<button name="cancelled_request"  string="Cancel" type="object" states="Draft,Waiting," groups="base.group_user"/>
+	        	<field  name="state" widget="statusbar" statusbar_visible=",Draft,Waiting,Close,Cancel" statusbar_colors='{"Cancel":"red"}' readonly="1"/>
 	    	</header>
 	    
 			<sheet string="Issue Tools">
 	            <div class="oe_title">
 	            <h1>Tools Requisition</h1>    
-				<p>Tools Requisition Process. Mention the Project and employee that require Tools for clients projects.</p>
-				
+				<p> Mention the Project and employee that require Tools for clients projects.</p>
+	            <h2><field name="transaction_no" nolabel = "1" attrs="{'invisible':[('state','=','Draft')]}" /></h2>
 	            </div>
 	            <group>
-	                <group  attrs="{'readonly':[('state','!=','New')]}" >
-	                    <field name="transaction_no" attrs="{'invisible':[('state','=','Draft')]}" />
-						<field name="project"  />
-						 <field name="employee"/>
+	                <group string = "Tools Issuance"   >
+						 <field name="project" attrs="{'readonly':[('state','!=','Draft')]}"  />
+						 <field name="employee" attrs="{'readonly':[('state','!=','Draft')]}"/>
 	                </group>
-					<group attrs="{'readonly':[('state','!=','Draft')]}">
-						
+					<group string = "Date,Approval">
 						<field name="date_requisted" />
-						<field name="date_returned" readonly = "1"/>
+						<field name="date_approved" />
+						<field name="aprroved_by" />
 	                </group>
-					<group>
-						<field name="aprroved_by" readonly = "1"/>
+	           </group> 
+	           <group>
+	                <group string = "Tools Return">
+						<field name="date_returned"  attrs="{'invisible':[('state','!=','Returned')]}" /> 
+						<field name="returned_to" attrs="{'invisible':[('state','!=','Returned')]}" />
 	                </group>
 	            </group>
 	            <notebook>
@@ -101,6 +104,7 @@
 		    <field name="arch" type="xml">
 		    <tree editable = "bottom" string="Tools Requisition">
 		        <field name="name"/>
+		        <field name="product_qty" invisible = "1"/>
 		        <field name="requisition_id" invisible = "1"/>
 		    </tree>
 		    </field>
