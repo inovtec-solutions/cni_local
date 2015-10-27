@@ -14,6 +14,7 @@ class product_template(osv.osv):
     }
     
 class asset_requisition(osv.osv):
+    """"Asset requisition or tools requistion are the same things"""
     
     def write(self, cr, uid, ids, vals, context=None, check=True, update_check=True):
         result = super(osv.osv, self).write(cr, uid, ids, vals, context)
@@ -24,7 +25,7 @@ class asset_requisition(osv.osv):
     
     def send_request(self, cr, uid, ids, context=None):
         tr_no = self.set_transaction_no(cr, uid, ids)
-        self.write(cr, uid, ids, {'state':'Open','transaction_no':tr_no})
+        self.write(cr, uid, ids, {'state':'Waiting','transaction_no':tr_no})
         return
     
     def _get_asset_state(self, cr, uid, team, internal_state):
@@ -38,24 +39,38 @@ class asset_requisition(osv.osv):
     
     def approve_request(self, cr, uid, ids, context=None):
         
+        denied = ''
         for f in self.browse(cr, uid, ids, context):
             #update 
             line_ids = self.pool.get('asset.requisition.lines').search(cr, uid, [('requisition_id','=',f.id)])
             if line_ids:
                 reconcile_rec = self.pool.get('asset.requisition.lines').browse(cr,uid,line_ids)
-                _logger.info("=reconcile_rec========================================== : %r", reconcile_rec)
                 for line in reconcile_rec:
-                    #get wharhouse states
-                    wh_state =  self.pool.get('asset.state').search(cr, uid, [('team','=',1),('name','=','Issued')])
-                    if wh_state:
-                        _logger.info("=wh_state========================================== : %r", wh_state[0])
-                        self.pool.get('asset.asset').write(cr,uid,line.name.id,{
-                                                   'warehouse_state_id':wh_state[0],
-                                                   'user_id':f.employee.id})
-                        #if asset is updated, update asset requisition
-                        self.write(cr, uid, ids[0], {'state':'Approved','aprroved_by':uid})
-                    else:
-                        _logger.info("=No appropriate state found e.g Issued")
+                    #first check if this tool is available
+                    tool_id = self.pool.get('asset.asset').search(cr, uid,[('id','=',line.name.id)])
+                    if tool_id:
+                        tool_rec = self.pool.get('asset.asset').browse(cr,uid,tool_id[0])
+                        if not tool_rec.issued:
+                        #get wharhouse states
+                            wh_state =  self.pool.get('asset.state').search(cr, uid, [('team','=',1),('name','=','Issued')])
+                            if wh_state:
+                                self.pool.get('asset.asset').write(cr,uid,line.name.id,{
+                                                           'warehouse_state_id':wh_state[0],
+                                                           'user_id':f.employee.id,
+                                                           'issued':True})
+                                #if asset is updated, update asset requisition
+                                self.write(cr, uid, ids[0], {'state':'Approved','aprroved_by':uid})
+                            else:
+                                raise osv.except_osv(('Error'),("No appropriate state found for Isusuance, eg, Issued"))
+                        else:
+                            denied += tool_rec.name +"\n" 
+            
+            else:       
+                    
+                raise osv.except_osv(('Error'),("Cannot approve with empty list of tools, go back and mention some tools"))
+        
+        if denied:
+             raise osv.except_osv(('Tools not available,reclaim from previous technician and approve this request later on.'),(denied))
         return
         
     def return_asset(self, cr, uid, ids, context=None):
@@ -90,10 +105,10 @@ class asset_requisition(osv.osv):
     def set_transaction_no(self, cr, uid, ids):
         string = ""
         for f in self.browse(cr, uid, ids):
-            sql = """SELECT max(id) FROM asset_requisition WHERE state <> 'Draft'"""
+            sql = """SELECT max(id) FROM asset_requisition"""
             cr.execute(sql)
             numb = cr.fetchone()
-            if numb is not none  >0:
+            if numb[0] is not None or numb[0] > 0:
                 numb = int(numb[0])+1
                 
             else:
@@ -104,6 +119,9 @@ class asset_requisition(osv.osv):
     def cancelled_request(self, cr, uid, ids, context=None):
         self.write(cr, uid, ids[0], {'state':'Cancel','aprroved_by':uid})
         return
+    def set_draft(self, cr, uid, ids, context=None):
+        self.write(cr, uid, ids[0], {'state':'Draft'})
+        return
     
     _name = "asset.requisition"
     _columns = {
@@ -113,13 +131,13 @@ class asset_requisition(osv.osv):
         'employee':  fields.many2one('hr.employee', 'Required By', required=True, ondelete='restrict'),
         'date_requisted':  fields.date('Date ',required=True),
         'date_returned':  fields.date('Date Return',readonly=True),
-        'aprroved_by':  fields.many2one('res.users', 'Approved By'),
-        'returned_to':  fields.many2one('res.users', 'Returned To'),
-        'date_approved':  fields.date('Approved On'),
-        'requisition_lines_ids': fields.one2many('asset.requisition.lines', 'requisition_id', 'Assets'),
+        'aprroved_by':  fields.many2one('res.users', 'Approved By',readonly = True),
+        'returned_to':  fields.many2one('res.users', 'Returned To',readonly = True),
+        'date_approved':  fields.date('Approved On', readonly = True,),
+        'requisition_lines_ids': fields.one2many('asset.requisition.lines', 'requisition_id', 'Assets',required=True),
         'note': fields.text('Any Note'),
-        'state': fields.selection([('Draft','New'),
-                                   ('Open','Waiting'),
+        'state': fields.selection([('Draft','Draft'),
+                                   ('Waiting','Waiting'),
                                    ('Approved','Approved'),
                                    ('Cancel', 'Cancel'),
                                    ('Returned', 'Returned')
@@ -153,15 +171,15 @@ class asset_requisition_lines(osv.osv):
     _name = 'asset.requisition.lines'
     _description = "This object store fee types"
     _columns = {
-        'name': fields.many2one('asset.asset', 'Tool'),      
-        'product_qty': fields.float('Quantity'),
+        'name': fields.many2one('asset.asset', 'Tool',domain=[('issued','=',False)], required = True),      
+        'product_qty': fields.float('Quantity',),
         'requisition_id': fields.many2one('asset.requisition','Requisition'),
         'price_unit': fields.float('Unit Price'),
         'total':fields.float('Total'),
         
     }
     _sql_constraints = [  
-        ('Fee Exisits', 'unique (name,requisition_id)', 'Resource Already exists')
+        ('Duplicated', 'unique (name,requisition_id)', 'Resource Already exists')
     ] 
     _defaults = {
                  
