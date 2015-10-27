@@ -13,22 +13,26 @@ class cni_import_project_data(osv.osv_memory):
               'file_name': fields.char('File', size=300, required=True),
              }
     _defaults = {
-        'file_name': '/home/odoo/project_data.xls',
+        'file_name': '/home/odoo/data.xlsx',
     }
     
     def import_project_data(self, cr, uid, ids, context=None):
         current_obj = self.browse(cr, uid, ids, context=context)
         workbook = xlrd.open_workbook(current_obj[0].file_name)
-        worksheet = workbook.sheet_by_name('project_data')
+        worksheet = workbook.sheet_by_name('data')
         rows = worksheet.nrows - 1
         cells = worksheet.ncols - 1
         row = 7
-        counter = 1
+        w_counter = 0
+        c_counter = 0
+        
         while row <= rows:
             project_id_excel = str(worksheet.cell_value(row, 2))
             project_id_excel = project_id_excel.strip()
             
-            _logger.info("________________________ %r out of %r________________________", row, len(rows))
+            if  (row-6) % 100 == 0:
+                _logger.info("_______ %r out of %r_________", (row-6), (rows-6))
+                _logger.info("_______ Created: %r__________ Edited: %r", c_counter, w_counter)
             
             if project_id_excel == "":
                 row += 1    
@@ -110,18 +114,25 @@ class cni_import_project_data(osv.osv_memory):
                             ('activity_description','=',activity_description),('item','=',item),('gr_doc_pa','=',gr_doc_pa)])
                     
                 if material_exist:
-                    material_id = material_exist[0]
-                    _logger.info("_____IF Material____%r [%r]", material_id,counter)
-                    counter = counter + 1
-                    self.pool.get('project.material').write(cr, uid, material_id, {
-                        'material_req_date': material_req_date,
-                        'req_quantiity': worksheet.cell_value(row,37),
-                        'shiping_date': shiping_date,
-                        'delivery_pa': worksheet.cell_value(row,63),
-                        'gi_date': gi_date,
-                        'po_pa': worksheet.cell_value(row,70),
-                        'pa_gi_doc': pa_gi_doc}, context=context)
+                    material_unchanged_exist = self.pool.get('project.material').search(cr, uid, [('network_id','=',network),('plant','=',plant),
+                            ('activity_description','=',activity_description),('item','=',item),('gr_doc_pa','=',gr_doc_pa),
+                            ('material_req_date','=',material_req_date),('req_quantiity','=',worksheet.cell_value(row,37)),
+                            ('shiping_date','=',shiping_date),('delivery_pa','=', worksheet.cell_value(row,63)),('gi_date','=',gi_date),
+                            ('po_pa','=',worksheet.cell_value(row,70)),('pa_gi_doc','=',pa_gi_doc)])
+                    
+                    if not material_unchanged_exist:
+                        material_id = material_exist[0]
+                        w_counter = w_counter + 1
+                        self.pool.get('project.material').write(cr, uid, material_id, {
+                            'material_req_date': material_req_date,
+                            'req_quantiity': worksheet.cell_value(row,37),
+                            'shiping_date': shiping_date,
+                            'delivery_pa': worksheet.cell_value(row,63),
+                            'gi_date': gi_date,
+                            'po_pa': worksheet.cell_value(row,70),
+                            'pa_gi_doc': pa_gi_doc}, context=context)
                 else:
+                    c_counter = c_counter + 1
                     self.pool.get('project.material').create(cr, uid, {
                         'name': project_id,
                         'network_id': network,
