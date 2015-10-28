@@ -24,13 +24,11 @@ class asset_requisition(osv.osv):
         return result
     
     def send_request(self, cr, uid, ids, context=None):
-        tr_no = self.set_transaction_no(cr, uid, ids)
+        tr_no = self.set_transaction_no(cr, uid, ids,'asset_requisition')
         self.write(cr, uid, ids, {'state':'Waiting','transaction_no':tr_no})
         return
     
     def _get_asset_state(self, cr, uid, team, internal_state):
-        _logger.info("=in called method team========================================== : %r", team)
-        _logger.info("=in called method internal_state========================================== : %r", internal_state)
         state_id = self.pool.get('asset.state').search(cr, uid, [('team','=',team),('name','=',internal_state)])
         if state_id:
             return state_id[0]
@@ -88,7 +86,8 @@ class asset_requisition(osv.osv):
                         _logger.info("=wh_state========================================== : %r", wh_state[0])
                         self.pool.get('asset.asset').write(cr,uid,line.name.id,{
                                                    'warehouse_state_id':wh_state[0],
-                                                   'user_id':f.employee.id})
+                                                   'user_id':False,
+                                                   'issued':False})
                         #if asset is updated, update asset requisition
                         self.write(cr, uid, ids[0], {'state':'Returned','returned_to':uid,'date_returned':datetime.date.today()})
                     else:
@@ -102,10 +101,17 @@ class asset_requisition(osv.osv):
             result[f.id] = f.project.name + " (" + f.employee.name+")"
         return result
     
-    def set_transaction_no(self, cr, uid, ids):
+    def set_transaction_no(self, cr, uid, ids,object):
         string = ""
+        if object == 'daily_sale_reconciliation':
+            substr = 'DS'
+        elif  object == 'asset_requisition':
+            substr = 'TR'
+        elif object == 'get_client_stock':
+            substr = 'CS'
+        
         for f in self.browse(cr, uid, ids):
-            sql = """SELECT max(id) FROM asset_requisition"""
+            sql = """SELECT max(id) FROM """+str(object)
             cr.execute(sql)
             numb = cr.fetchone()
             if numb[0] is not None or numb[0] > 0:
@@ -113,7 +119,7 @@ class asset_requisition(osv.osv):
                 
             else:
                 numb = 1    
-            string  = "TR-"+str(numb)
+            string  = str(substr)+"-"+str(numb)
         return string
     
     def cancelled_request(self, cr, uid, ids, context=None):
@@ -123,17 +129,22 @@ class asset_requisition(osv.osv):
         self.write(cr, uid, ids[0], {'state':'Draft'})
         return
     
+    def onchange_project(self, cr, uid, ids, project_id):
+        res =  {}
+        res['value'] = {'employee': None}
+        return res
+    
     _name = "asset.requisition"
     _columns = {
         'name':fields.function(_set_name, method=True,  size=256, string='Code',type='char'),
         'transaction_no':fields.char('No.',readonly = True,size = 50), 
-        'project':  fields.many2one('project.project', 'Project', required=True, ondelete='restrict'),
-        'employee':  fields.many2one('hr.employee', 'Required By', required=True, ondelete='restrict'),
-        'date_requisted':  fields.date('Date ',required=True),
-        'date_returned':  fields.date('Date Return',readonly=True),
-        'aprroved_by':  fields.many2one('res.users', 'Approved By',readonly = True),
-        'returned_to':  fields.many2one('res.users', 'Returned To',readonly = True),
-        'date_approved':  fields.date('Approved On', readonly = True,),
+        'project': fields.many2one('project.project', 'Project', required=True, ondelete='restrict'),
+        'employee': fields.many2one('res.users', 'Required By',domain = [('work_on_task','=',True)], required=True, ondelete='restrict'),
+        'date_requisted': fields.date('Date ',required=True),
+        'date_returned': fields.date('Date Return',readonly=True),
+        'aprroved_by': fields.many2one('res.users', 'Approved By',readonly = True),
+        'returned_to': fields.many2one('res.users', 'Returned To',readonly = True),
+        'date_approved': fields.date('Approved On', readonly = True,),
         'requisition_lines_ids': fields.one2many('asset.requisition.lines', 'requisition_id', 'Assets',required=True),
         'note': fields.text('Any Note'),
         'state': fields.selection([('Draft','Draft'),
@@ -192,6 +203,9 @@ class daily_sale_reconciliation(osv.osv):
     
     def dispatch_product(self, cr, uid, ids, context=None):
         self.write(cr, uid, ids[0], {'state':'Dispatched','dispatched_by':uid})
+        
+        tr_no = self.pool.get('asset.requisition').set_transaction_no(cr, uid, ids,'daily_sale_reconciliation')
+        return
         #update lines state
         reconcile_ids = self.pool.get('sale.reconcile.lines').search(cr, uid, [('dispatch_id','=',ids[0])])
         
@@ -201,9 +215,9 @@ class daily_sale_reconciliation(osv.osv):
             for line in reconcile_rec:
                 rec_product = self.pool.get('product.template').browse(cr,uid,line.name.product_tmpl_id.id)
                 price = rec_product.list_price
-                _logger.info("=price========================================== : %r", price)
                 
                 self.pool.get('sale.reconcile.lines').write(cr,uid,line.id,{'state':'Dispatched','price_unit':price,'total':float(line.dispatch_qty * price)})
+        self.write(cr, uid, ids[0], {'state':'Dispatched','dispatched_by':uid,'transaction_no':tr_no})
         return
     
     def confirm_sale(self, cr, uid, ids, context=None):
@@ -242,24 +256,20 @@ class daily_sale_reconciliation(osv.osv):
                 result[f.id] = sum
         return result
     
+    
     def onchange_project(self, cr, uid, ids, project_id):
-        result =[]
-        project_obj = self.pool.get('project.project').browse(cr, uid, project_id)
-        sql = """SELECT uid from project_user_rel WHERE
-                  project_id ="""+str(project_id)
-        cr.execute(sql)
-        rows=cr.fetchall() 
-        for id in  rows:
-            result.append(id[0]) 
-        res = {'domain': {'employee': [('id', 'in', result)],'project': [('project_id', '=',project_id)]}}
+        res =  {}
+        res = {'domain': {'task_id': [('project_id', '=',project_id)]}}
+        res['value'] = {'task_id': None, 'employee': None }
         return res
     
     _name = "daily.sale.reconciliation"
     _columns = {
         'name': fields.char('Name', size=64),
+        'transaction_no':fields.char('No.',readonly = True,size = 50),
         'project':  fields.many2one('project.project', 'Project', required=True, ondelete='restrict'),
         'task_id':  fields.many2one('project.task', 'Task', required=True, ondelete='restrict'),
-        'employee':  fields.many2one('res.users', 'Technician',required=True, ondelete='restrict'),
+        'employee':  fields.many2one('res.users', 'Technician',required=True, domain = [('work_on_task','=',True)], ondelete='restrict'),
         'date_dispatched':  fields.date('Date',required=True),
         'date_confirmed':  fields.date('Date Confirm',readonly=True),
         'dispatched_by':  fields.many2one('res.users', 'Dispatch By',readonly=True),
@@ -305,6 +315,29 @@ class sale_reconcile_lines(osv.osv):
                        'net_qty':vals['net_qty'],
                        'total':vals['total'],
                        }) 
+        return {'value':vals}
+    
+    def onchange_dispatch_qty(self, cr, uid, ids,dispatch_qty,sale_price):
+        vals = {}
+        total = dispatch_qty * sale_price
+        vals['total'] = total
+        vals['net_qty'] = dispatch_qty 
+        return {'value':vals}
+    
+    def onchange_returned_qty(self, cr, uid, ids,return_qty,sale_price):
+        vals = {}
+        for f in self.browse(cr,uid,ids):
+            total = (f.dispatch_qty -return_qty ) * sale_price
+            vals['total'] = total
+            vals['net_qty'] = f.dispatch_qty - return_qty 
+            vals['returned_qty'] = return_qty
+            update_lines = self.pool.get('sale.reconcile.lines').write(cr, uid, ids, vals) 
+        return {'value':vals}
+    
+    def onchange_product(self, cr, uid, ids,product):
+        vals = {}
+        rec_product = self.pool.get('product.product').browse(cr,uid,product)
+        vals['price_unit'] = rec_product.list_price
         return {'value':vals}
     
     def unlink(self, cr, uid, ids, context=None):
@@ -371,11 +404,19 @@ class get_client_stock(osv.osv):
                 result[f.id] = sum
         return result
     
+    def onchange_project(self, cr, uid, ids, project_id):
+        res =  {}
+        rec_project =  self.pool.get('project.project').browse(cr, uid, project_id)
+        res = {'domain': {'partner_id': [('id', '=',rec_project.partner_id.id)]}}
+        res['value'] = {'partner_id':rec_project.partner_id.id }
+        return res
+    
+       
     _name = "get.client.stock"
     _columns = {
         'name': fields.char('Name', size=64),
-        'project':  fields.many2one('project.project', 'Project', readonly=True, ondelete='restrict'),
-        'partner_id': fields.many2one('res.partner', 'Client'),
+        'project':  fields.many2one('project.project', 'Project', required = True, ondelete='restrict'),
+        'partner_id': fields.many2one('res.partner', 'Client',readonly = True),
         'date_received':  fields.date('Date',required=True),
         'location_id': fields.many2one('stock.location', 'Warehouse', required=True, domain=[('usage','<>','view')]),
         'aprroved_by':  fields.many2one('res.users', 'Approved By' ,readonly = True),
@@ -412,6 +453,11 @@ class client_stock_lines(osv.osv):
         result = super(osv.osv, self).unlink(cr, uid, ids, context)
         return result 
     
+    def onchange_qty(self, cr, uid, ids, qty,price):
+        vals =  {}
+        vals['total'] = qty * price
+        return {'value':vals}
+    
     def onchange_returned_product(self, cr, uid, ids,return_qty):
         vals = {}
         for f in self.browse(cr,uid,ids):
@@ -426,7 +472,7 @@ class client_stock_lines(osv.osv):
     _name = 'client.stock.lines'
     _description = "Clint stock lines"
     _columns = {
-        'name': fields.many2one('product.product', 'Tool'),      
+        'name': fields.many2one('product.template', 'Tool',domain = [('type','=','product')]),      
         'product_qty': fields.float('Quantity'),
         'stock_parent_id': fields.many2one('get.client.stock','Requisition'),
         'price_unit': fields.float('Unit Price'),

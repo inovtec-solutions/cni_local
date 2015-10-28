@@ -39,7 +39,7 @@
 	            </div>
 	            <group>
 	                <group string = "Tools Issuance"   >
-						 <field name="project" attrs="{'readonly':[('state','!=','Draft')]}"  />
+						 <field name="project" on_change="onchange_project(project)"  attrs="{'readonly':[('state','!=','Draft')]}"  />
 						 <field name="employee" attrs="{'readonly':[('state','!=','Draft')]}"/>
 	                </group>
 					<group string = "Date,Approval">
@@ -126,10 +126,12 @@
 	        </header>
 	        
 			<sheet string="Material Sale Process">
-	        	<h2><p>Daily Consumable Items</p></h2>
-				<p style = "color:blue;">Initiate your daily consumable items process. Material should be reconcile on same form,</p>
+	            <div class="oe_title">
+	            <h1>Daily Consumable Items</h1>    
+				<p> Initiate your daily consumable items process. Material should be reconcile on same form.</p>
+	            <h2><field name="transaction_no" nolabel = "1" attrs="{'invisible':[('state','=','Draft')]}" /></h2>
+	            </div>
 	            <group>
-				
 				<group attrs="{'readonly':[('state','!=','Draft')]}">
 					<field name="project"  on_change="onchange_project(project)"  />
 					 <field name="task_id" />
@@ -197,11 +199,11 @@
 	    <field name="model">sale.reconcile.lines</field>
 	    <field name="arch" type="xml">
 	    <tree editable = "bottom" string="Daily Sale Requistion">
-	        <field name="name" attrs="{'readonly':[('state','!=','Draft')]}"  />
-	        <field name="dispatch_qty" attrs="{'readonly':[('state','!=','Draft')]}" />
-	        <field name="returned_qty" on_change="onchange_returned_product(returned_qty)" attrs="{'readonly':[('state','!=','Dispatched')]}"/>
-			<field name="net_qty" readonly ="1" attrs="{'invisible':[('state','=','Draft')]}"/>
-			<field name="price_unit" attrs="{'readonly':[('state','in',['Cancel','Confirmed'])]}"/>
+	        <field name="name" on_change="onchange_product(name)" attrs="{'readonly':[('state','!=','Draft')]}"  />
+	        <field name="dispatch_qty" on_change="onchange_dispatch_qty(net_qty,price_unit)" attrs="{'readonly':[('state','!=','Draft')]}" />
+	        <field name="returned_qty" on_change="onchange_returned_qty(returned_qty,price_unit)" attrs="{'readonly':[('state','in',['Dispatched'])],'invisible':[('state','in',['Draft'])]}"/>
+			<field name="net_qty" readonly ="1" attrs="{'readonly':[('state','in',['Confirmed'])],'invisible':[('state','in',['Draft'])]}"/>
+			<field name="price_unit" on_change="onchange_dispatch_qty(net_qty,price_unit)" attrs="{'readonly':[('state','in',['Cancel','Confirmed'])],'invisible':[('state','in',['Draft'])]}"/>
 			<field name="total" readonly ="1"/>
 			<field name="state" readonly = "1"/>
 	    </tree>
@@ -354,9 +356,9 @@
 	            </div>
 	            <group>
 	                <group  attrs="{'readonly':[('state','!=','Draft')]}" >
-	                    <field name="project" />
+	                    <field name="project" on_change="onchange_project(project)" attrs="{'readonly':[('state','!=','Draft')]}" />
 						<field name="partner_id" />
-						 <field name="date_received"/>
+						 <field name="date_received" attrs="{'readonly':[('state','!=','Draft')]}" />
 	                </group>
 					<group>
 						<field name="aprroved_by" readonly = "1"/>
@@ -412,8 +414,8 @@
 		    <field name="arch" type="xml">
 		    <tree editable = "bottom" string="Tools Requisition">
 		        <field name="name"/>
-		        <field name="product_qty"/>
-				<field name="price_unit"/>
+		        <field name="product_qty" on_change="onchange_qty(product_qty,price_unit)"/>
+				<field name="price_unit" on_change="onchange_qty(product_qty,price_unit)"/>
 				<field name="total"/>
 		    </tree>
 		    </field>
