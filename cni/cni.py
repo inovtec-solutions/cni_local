@@ -594,6 +594,7 @@ class project_project(osv.osv):
     _name = 'project.project'
     _inherit ='project.project'
     _columns = {
+    'name': fields.char('Name', size=64, readonly = True),
     'restrict_access':fields.function(is_access_restricted, method=True, string='Restrict Access',type='boolean'),
     'partner_id': fields.many2one('res.partner', 'Client', readonly = True),
     'excel_project': fields.boolean('Issued',readonly=True),
@@ -619,6 +620,7 @@ class project_project(osv.osv):
                  'project_types':lambda *a:'General',
                  'excel_project':lambda *a:False,
                  'privacy_visibility': 'followers',
+                 'name': 'New Project',
     }
 project_project()
 
