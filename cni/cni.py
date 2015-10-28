@@ -12,6 +12,7 @@ class product_template(osv.osv):
         'sku': fields.char('SKU', size=64, required=True),
         'dimension': fields.char('Dimension', size=64),
     }
+product_template()   
     
 class asset_requisition(osv.osv):
     """"Asset requisition or tools requistion are the same things"""
@@ -472,7 +473,7 @@ class client_stock_lines(osv.osv):
     _name = 'client.stock.lines'
     _description = "Clint stock lines"
     _columns = {
-        'name': fields.many2one('product.template', 'Tool',domain = [('type','=','product')]),      
+        'name': fields.many2one('product.product', 'Tool',domain = [('type','=','product')]),      
         'product_qty': fields.float('Quantity'),
         'stock_parent_id': fields.many2one('get.client.stock','Requisition'),
         'price_unit': fields.float('Unit Price'),
@@ -594,7 +595,7 @@ class project_project(osv.osv):
     _inherit ='project.project'
     _columns = {
     'restrict_access':fields.function(is_access_restricted, method=True, string='Restrict Access',type='boolean'),
-    'partner_id': fields.many2one('res.partner', 'Client'),
+    'partner_id': fields.many2one('res.partner', 'Client', readonly = True),
     'excel_project': fields.boolean('Issued',readonly=True),
     'upload_file': fields.binary('File'),
     'project_planned_hours': fields.float('Project Hours'),
@@ -682,7 +683,7 @@ class project_work(osv.osv):
 #                     raise osv.except_osv(('Work Hour Exceeds'),('Reset Spent Hours'))
 #                 else:
 #                     return True
-        return 
+        return True
     
     def create(self, cr, uid, vals, context=None, check=True):
         result = super(osv.osv, self).create(cr, uid, vals, context)
@@ -692,6 +693,7 @@ class project_work(osv.osv):
   
      
     def write(self, cr, uid, ids, vals, context=None, check=True, update_check=True):
+        result = False
         for f in self.browse(cr,uid,ids):
             check = self.check_constrains(cr, uid, vals,f.task_id.id)
             if check:
