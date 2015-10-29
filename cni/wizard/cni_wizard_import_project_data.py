@@ -39,7 +39,7 @@ class cni_import_project_data(osv.osv_memory):
                 continue
             
             plant =  worksheet.cell_value(row, 20)
-	    p_a = str(worksheet.cell_value(row, 31))
+            p_a = str(worksheet.cell_value(row, 31))
             p_a = p_a.strip()
 
             if p_a == 'P-A' and (plant == 1020.0 or plant == 1050.0):
