@@ -50,7 +50,6 @@ class cni_import_project_data(osv.osv_memory):
                     #_logger.info("_______________IF Project____________%r", project_id_excel)
             
                 else:
-                    
                     res_partner = self.pool.get('res.partner').search(cr, uid, [('name','=','Bell')])
                     if res_partner:
                         res_partner = res_partner[0]
@@ -66,14 +65,13 @@ class cni_import_project_data(osv.osv_memory):
 
                     wbs = str(worksheet.cell_value(row, 11))
                     wbs = wbs.strip()
-                
-		    #_logger.info("_______________IF Project____________%r  %r  %r  %r  %r  %r  %r ", project_id_excel,network,res_partner,project_id_excel,status,actv_desc,wbs)
+                    #_logger.info("_______________ Created ____________%r  %r  %r  %r  %r  %r  %r ", project_id_excel,network,res_partner,project_id_excel,status,actv_desc,wbs)
 
                     project_id = self.pool.get('project.project').create(cr, uid, {
                         'name': project_id_excel,
                         'network_id': network,
                         'excel_project': True,
-                        'user_id': None,
+                        'user_id': uid,
                         'partner_id': res_partner,
                         'project_types': 'Pre-Assembly',
                         'project_id': project_id_excel,
