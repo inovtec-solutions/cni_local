@@ -1,4 +1,5 @@
 from openerp.osv import fields, osv
+from openerp.tools.translate import _
 import datetime
 import xlrd
 import logging
@@ -11,18 +12,39 @@ class cni_import_project_data(osv.osv_memory):
     _description = "Import Project Data From Excel"
     _columns = {
               'file_name': fields.char('File', size=300, required=True),
-             }
+              'start_from': fields.integer('Start From'),
+              'records': fields.integer('Number of Records'),
+        }
     _defaults = {
         'file_name': '/home/odoo/data.xlsx',
+        'start_from': 1,
+        'records': 0,
     }
     
     def import_project_data(self, cr, uid, ids, context=None):
         current_obj = self.browse(cr, uid, ids, context=context)
+        start_from = current_obj[0].start_from
+        records = current_obj[0].records
+        
         workbook = xlrd.open_workbook(current_obj[0].file_name)
         worksheet = workbook.sheet_by_name('data')
+        
         rows = worksheet.nrows - 1
         cells = worksheet.ncols - 1
-        row = 7
+        
+        if start_from <= 0:
+            raise osv.except_osv(_('Error!'), _('Please enter valid range'))
+        
+        if records < 0:
+            raise osv.except_osv(_('Error!'), _('Please enter valid range'))
+
+        row = start_from + 6
+        if rows < row:
+            raise osv.except_osv(_('Error!'), _('Please enter valid range'))
+        
+        if rows > (records + row - 1) and records > 0:
+            rows = records + row - 1
+        
         w_counter = 0
         c_counter = 0
         
@@ -43,7 +65,6 @@ class cni_import_project_data(osv.osv_memory):
             p_a = p_a.strip()
 
             if p_a == 'P-A' and (plant == 1020.0 or plant == 1050.0):
-                
                 project_exist = self.pool.get('project.project').search(cr, uid, [('project_id','=',project_id_excel)])
                 if project_exist:
                     project_id = project_exist[0]
@@ -71,7 +92,7 @@ class cni_import_project_data(osv.osv_memory):
                         'name': project_id_excel,
                         'network_id': network,
                         'excel_project': True,
-                        'user_id': uid,
+                        'user_id': None,
                         'partner_id': res_partner,
                         'project_types': 'Pre-Assembly',
                         'project_id': project_id_excel,
@@ -170,6 +191,10 @@ class cni_import_project_data(osv.osv_memory):
                         'pa_gi_doc': pa_gi_doc}, context=context)            
 
             row += 1
+        
+        _logger.info("Completed: %r out of %r_________", (row-7), (rows-6))
+        _logger.info("_______ Created: %r__________ Edited: %r", c_counter, w_counter)
+
         return {}
 
 cni_import_project_data()
