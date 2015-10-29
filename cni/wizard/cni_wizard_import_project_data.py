@@ -39,7 +39,10 @@ class cni_import_project_data(osv.osv_memory):
                 continue
             
             plant =  worksheet.cell_value(row, 20)
-            if worksheet.cell_value(row, 31) == 'P-A' and (plant == 1020.0 or plant == 1050.0):
+	    p_a = str(worksheet.cell_value(row, 31))
+            p_a = p_a.strip()
+
+            if p_a == 'P-A' and (plant == 1020.0 or plant == 1050.0):
                 
                 project_exist = self.pool.get('project.project').search(cr, uid, [('project_id','=',project_id_excel)])
                 if project_exist:
@@ -54,7 +57,18 @@ class cni_import_project_data(osv.osv_memory):
                     
                     network = str(worksheet.cell_value(row, 4))
                     network = network.strip()
+
+                    status = str(worksheet.cell_value(row, 10))
+                    status = status.strip()
+
+                    actv_desc = str(worksheet.cell_value(row, 6))
+                    actv_desc = actv_desc.strip()
+
+                    wbs = str(worksheet.cell_value(row, 11))
+                    wbs = wbs.strip()
                 
+		    #_logger.info("_______________IF Project____________%r  %r  %r  %r  %r  %r  %r ", project_id_excel,network,res_partner,project_id_excel,status,actv_desc,wbs)
+
                     project_id = self.pool.get('project.project').create(cr, uid, {
                         'name': project_id_excel,
                         'network_id': network,
@@ -63,9 +77,9 @@ class cni_import_project_data(osv.osv_memory):
                         'partner_id': res_partner,
                         'project_types': 'Pre-Assembly',
                         'project_id': project_id_excel,
-                        'status': worksheet.cell_value(row, 10),
-                        'actv_desc': worksheet.cell_value(row, 6),
-                        'wbs': worksheet.cell_value(row,11),}, context=context)            
+                        'status': status,
+                        'actv_desc': actv_desc,
+                        'wbs': wbs,}, context=context)            
 
                 material_desc = str(worksheet.cell_value(row, 22))
                 material_desc = material_desc.strip()
@@ -85,7 +99,13 @@ class cni_import_project_data(osv.osv_memory):
                 gr_doc_pa = str(worksheet.cell_value(row, 72))
                 gr_doc_pa = gr_doc_pa.strip()
                 
-                delivery_date = str(worksheet.cell_value(row,66))
+                delivery_pa = str(worksheet.cell_value(row, 63))
+                delivery_pa = delivery_pa.strip()
+
+                po_pa = str(worksheet.cell_value(row, 70))
+                po_pa = po_pa.strip()
+
+	        delivery_date = str(worksheet.cell_value(row,66))
                 if delivery_date.strip() == "":
                     delivery_date = None
                 else:
@@ -127,9 +147,9 @@ class cni_import_project_data(osv.osv_memory):
                             'material_req_date': material_req_date,
                             'req_quantiity': worksheet.cell_value(row,37),
                             'shiping_date': shiping_date,
-                            'delivery_pa': worksheet.cell_value(row,63),
+                            'delivery_pa': delivery_pa,
                             'gi_date': gi_date,
-                            'po_pa': worksheet.cell_value(row,70),
+                            'po_pa': po_pa,
                             'pa_gi_doc': pa_gi_doc}, context=context)
                 else:
                     c_counter = c_counter + 1
@@ -146,10 +166,10 @@ class cni_import_project_data(osv.osv_memory):
                         'mat_desc': material_desc,
                         'req_quantiity': worksheet.cell_value(row,37),
                         'shiping_date': shiping_date,
-                        'delivery_pa': worksheet.cell_value(row,63),
+                        'delivery_pa': delivery_pa,
                         'gi_date': gi_date,
-                        'po_pa': worksheet.cell_value(row,70),
-                        'pa_gi_doc': worksheet.cell_value(row,67)}, context=context)            
+                        'po_pa': po_pa,
+                        'pa_gi_doc': pa_gi_doc}, context=context)            
 
             row += 1
         return {}
