@@ -12,6 +12,7 @@ class cni_import_project_data(osv.osv_memory):
     _description = "Import Project Data From Excel"
     _columns = {
               'file_name': fields.char('File', size=300, required=True),
+              'advanced': fields.boolean('Advanced Search'),
               'start_from': fields.integer('Start From'),
               'records': fields.integer('Number of Records'),
         }
@@ -112,7 +113,7 @@ class cni_import_project_data(osv.osv_memory):
                 network = str(worksheet.cell_value(row, 4))
                 network = network.strip()
                 
-                pa_gi_doc = str(worksheet.cell_value(row, 56))
+                pa_gi_doc = str(worksheet.cell_value(row, 67))
                 pa_gi_doc = pa_gi_doc.strip()
                 
                 gr_doc_pa = str(worksheet.cell_value(row, 72))
@@ -123,8 +124,8 @@ class cni_import_project_data(osv.osv_memory):
 
                 po_pa = str(worksheet.cell_value(row, 70))
                 po_pa = po_pa.strip()
-
-	        delivery_date = str(worksheet.cell_value(row,66))
+                
+                delivery_date = str(worksheet.cell_value(row,66))
                 if delivery_date.strip() == "":
                     delivery_date = None
                 else:
@@ -187,8 +188,7 @@ class cni_import_project_data(osv.osv_memory):
                         'shiping_date': shiping_date,
                         'delivery_pa': delivery_pa,
                         'gi_date': gi_date,
-                        'po_pa': po_pa,
-                        'pa_gi_doc': pa_gi_doc}, context=context)            
+                        'po_pa': po_pa}, context=context)            
 
             row += 1
         
