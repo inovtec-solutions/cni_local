@@ -26,25 +26,28 @@ class cni_import_project_data(osv.osv_memory):
         current_obj = self.browse(cr, uid, ids, context=context)
         start_from = current_obj[0].start_from
         records = current_obj[0].records
+        advanced = current_obj[0].advanced
         
         workbook = xlrd.open_workbook(current_obj[0].file_name)
         worksheet = workbook.sheet_by_name('data')
         
         rows = worksheet.nrows - 1
         cells = worksheet.ncols - 1
+        row = 7
         
-        if start_from <= 0:
-            raise osv.except_osv(_('Error!'), _('Please enter valid range'))
-        
-        if records < 0:
-            raise osv.except_osv(_('Error!'), _('Please enter valid range'))
-
-        row = start_from + 6
-        if rows < row:
-            raise osv.except_osv(_('Error!'), _('Please enter valid range'))
-        
-        if rows > (records + row - 1) and records > 0:
-            rows = records + row - 1
+        if advanced:
+            if start_from <= 0:
+                raise osv.except_osv(_('Error!'), _('Please enter valid range'))
+            
+            if records <= 0:
+                raise osv.except_osv(_('Error!'), _('Please enter valid range'))
+    
+            row = start_from + 6
+            if rows < row:
+                raise osv.except_osv(_('Error!'), _('Please enter valid range'))
+            
+            if rows > (records + row - 1) and records > 0:
+                rows = records + row - 1
         
         w_counter = 0
         c_counter = 0
