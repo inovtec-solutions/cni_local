@@ -11,6 +11,11 @@
                 <form string="Import Project Data">
                     <group col="4">
 						<field name="file_name"/>
+						<newline/>
+						<field name="advanced"/>
+						<newline/>
+						<field name="start_from" attrs="{'invisible':[('advanced','=',False)]}"/>
+						<field name="records" attrs="{'invisible':[('advanced','=',False)]}"/>
 					</group>
                     <footer>
                         <button string="Import" name="import_project_data" type="object" class="oe_highlight"/>

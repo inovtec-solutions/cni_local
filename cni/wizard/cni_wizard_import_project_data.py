@@ -1,4 +1,5 @@
 from openerp.osv import fields, osv
+from openerp.tools.translate import _
 import datetime
 import xlrd
 import logging
@@ -11,18 +12,43 @@ class cni_import_project_data(osv.osv_memory):
     _description = "Import Project Data From Excel"
     _columns = {
               'file_name': fields.char('File', size=300, required=True),
-             }
+              'advanced': fields.boolean('Advanced Search'),
+              'start_from': fields.integer('Start From'),
+              'records': fields.integer('Number of Records'),
+        }
     _defaults = {
         'file_name': '/home/odoo/data.xlsx',
+        'start_from': 1,
+        'records': 0,
     }
     
     def import_project_data(self, cr, uid, ids, context=None):
         current_obj = self.browse(cr, uid, ids, context=context)
+        start_from = current_obj[0].start_from
+        records = current_obj[0].records
+        advanced = current_obj[0].advanced
+        
         workbook = xlrd.open_workbook(current_obj[0].file_name)
         worksheet = workbook.sheet_by_name('data')
+        
         rows = worksheet.nrows - 1
         cells = worksheet.ncols - 1
         row = 7
+        
+        if advanced:
+            if start_from <= 0:
+                raise osv.except_osv(_('Error!'), _('Please enter valid range'))
+            
+            if records <= 0:
+                raise osv.except_osv(_('Error!'), _('Please enter valid range'))
+    
+            row = start_from + 6
+            if rows < row:
+                raise osv.except_osv(_('Error!'), _('Please enter valid range'))
+            
+            if rows > (records + row - 1) and records > 0:
+                rows = records + row - 1
+        
         w_counter = 0
         c_counter = 0
         
@@ -39,22 +65,33 @@ class cni_import_project_data(osv.osv_memory):
                 continue
             
             plant =  worksheet.cell_value(row, 20)
-            if worksheet.cell_value(row, 31) == 'P-A' and (plant == 1020.0 or plant == 1050.0):
-                
+            p_a = str(worksheet.cell_value(row, 31))
+            p_a = p_a.strip()
+
+            if p_a == 'P-A' and (plant == 1020.0 or plant == 1050.0):
                 project_exist = self.pool.get('project.project').search(cr, uid, [('project_id','=',project_id_excel)])
                 if project_exist:
                     project_id = project_exist[0]
                     #_logger.info("_______________IF Project____________%r", project_id_excel)
             
                 else:
-                    
                     res_partner = self.pool.get('res.partner').search(cr, uid, [('name','=','Bell')])
                     if res_partner:
                         res_partner = res_partner[0]
                     
                     network = str(worksheet.cell_value(row, 4))
                     network = network.strip()
-                
+
+                    status = str(worksheet.cell_value(row, 10))
+                    status = status.strip()
+
+                    actv_desc = str(worksheet.cell_value(row, 6))
+                    actv_desc = actv_desc.strip()
+
+                    wbs = str(worksheet.cell_value(row, 11))
+                    wbs = wbs.strip()
+                    #_logger.info("_______________ Created ____________%r  %r  %r  %r  %r  %r  %r ", project_id_excel,network,res_partner,project_id_excel,status,actv_desc,wbs)
+
                     project_id = self.pool.get('project.project').create(cr, uid, {
                         'name': project_id_excel,
                         'network_id': network,
@@ -63,9 +100,9 @@ class cni_import_project_data(osv.osv_memory):
                         'partner_id': res_partner,
                         'project_types': 'Pre-Assembly',
                         'project_id': project_id_excel,
-                        'status': worksheet.cell_value(row, 10),
-                        'actv_desc': worksheet.cell_value(row, 6),
-                        'wbs': worksheet.cell_value(row,11),}, context=context)            
+                        'status': status,
+                        'actv_desc': actv_desc,
+                        'wbs': wbs,}, context=context)            
 
                 material_desc = str(worksheet.cell_value(row, 22))
                 material_desc = material_desc.strip()
@@ -79,11 +116,17 @@ class cni_import_project_data(osv.osv_memory):
                 network = str(worksheet.cell_value(row, 4))
                 network = network.strip()
                 
-                pa_gi_doc = str(worksheet.cell_value(row, 56))
+                pa_gi_doc = str(worksheet.cell_value(row, 67))
                 pa_gi_doc = pa_gi_doc.strip()
                 
                 gr_doc_pa = str(worksheet.cell_value(row, 72))
                 gr_doc_pa = gr_doc_pa.strip()
+                
+                delivery_pa = str(worksheet.cell_value(row, 63))
+                delivery_pa = delivery_pa.strip()
+
+                po_pa = str(worksheet.cell_value(row, 70))
+                po_pa = po_pa.strip()
                 
                 delivery_date = str(worksheet.cell_value(row,66))
                 if delivery_date.strip() == "":
@@ -127,9 +170,9 @@ class cni_import_project_data(osv.osv_memory):
                             'material_req_date': material_req_date,
                             'req_quantiity': worksheet.cell_value(row,37),
                             'shiping_date': shiping_date,
-                            'delivery_pa': worksheet.cell_value(row,63),
+                            'delivery_pa': delivery_pa,
                             'gi_date': gi_date,
-                            'po_pa': worksheet.cell_value(row,70),
+                            'po_pa': po_pa,
                             'pa_gi_doc': pa_gi_doc}, context=context)
                 else:
                     c_counter = c_counter + 1
@@ -146,12 +189,15 @@ class cni_import_project_data(osv.osv_memory):
                         'mat_desc': material_desc,
                         'req_quantiity': worksheet.cell_value(row,37),
                         'shiping_date': shiping_date,
-                        'delivery_pa': worksheet.cell_value(row,63),
+                        'delivery_pa': delivery_pa,
                         'gi_date': gi_date,
-                        'po_pa': worksheet.cell_value(row,70),
-                        'pa_gi_doc': worksheet.cell_value(row,67)}, context=context)            
+                        'po_pa': po_pa}, context=context)            
 
             row += 1
+        
+        _logger.info("Completed: %r out of %r_________", (row-7), (rows-6))
+        _logger.info("_______ Created: %r__________ Edited: %r", c_counter, w_counter)
+
         return {}
 
 cni_import_project_data()

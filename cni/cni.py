@@ -600,7 +600,7 @@ class project_project(osv.osv):
     'upload_file': fields.binary('File'),
     'project_planned_hours': fields.float('Project Hours'),
     'project_types':fields.selection([('Pre-Assembly', 'Pre-Assembly'),('General', 'General')], 'Project Location'),
-    'project_type_template':fields.many2one('project.generic.template', 'Type', required = True),
+    'project_type_template':fields.many2one('project.generic.template', 'Type'),
     'consumable': fields.one2many('daily.sale.reconciliation', 'project', 'Consumable'),
     'stockable': fields.one2many('get.client.stock', 'project', 'Stockable'),
     'tools_used': fields.one2many('asset.requisition', 'project', 'Tools'),
