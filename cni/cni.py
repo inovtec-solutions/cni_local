@@ -949,7 +949,7 @@ class hr_timesheet_sheet(osv.osv):
                 vals['date_to'] = None
         return {'value':vals}
     
-    _columns = {'over_time': fields.float('Overtime', readonly = True),}
+    _columns = {}
     _defaults = {
         'date_from' : '',
         'date_to' : '',
@@ -968,8 +968,6 @@ class adjust_attendance_hours(osv.osv):
             return None
         
     def load_attendance(self, cr, uid, ids, context=None):
-        
-        
         
         for f in self.browse(cr, uid, ids, context):
             reconcile = False
@@ -1003,9 +1001,9 @@ class adjust_attendance_hours(osv.osv):
     
     _name = "adjust.attendance.hours"
     _columns = {
-        'name': fields.many2one('hr.employee','Employee',readonly = True),
-        'date_from':fields.date('From',required = True),
-        'date_to':fields.date('To',required = True),
+        'name': fields.many2one('hr.employee','Employee'),
+        'date_from1':fields.date('From'),
+        'date_to1':fields.date('To'),
         'total_regular_hrs':fields.float('Regular'),
         'total_overtime_hrs':fields.float('Over Time'),
         'grand_total':fields.float('Total'),
@@ -1034,9 +1032,4 @@ class attendance_adjustment_lines(osv.osv):
     }
     
 attendance_adjustment_lines()
-
-
-
-
-
 

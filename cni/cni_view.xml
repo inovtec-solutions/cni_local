@@ -645,30 +645,31 @@
 		<field name="name">adjust.attendance.hours.form</field>
 		<field name="model">adjust.attendance.hours</field>
 		<field name="arch" type="xml">
-			<sheet>
+			
+			
+			<form string="Tasks in Project">
 			<header>
 	           <button name="load_attendance" string="Show My Attendance" states="Draft"  type="object" class="oe_highlight" groups="base.group_user"/>
-	           <field  name="state" widget="statusbar" statusbar_visible=",Draft,Waiting,Close,Cancel" statusbar_colors='{"Cancel":"red"}' readonly="1"/>
+	           <field  name="state" widget="statusbar" statusbar_visible=",Draft,Calculated,Adjusted" statusbar_colors='{"Cancel":"red"}' readonly="1"/>
 	    	</header>
-			<form string="Tasks in Project">
-			
+	    	<sheet>
 			    <group>
 			    	<group>
 			   		<field name="name"/>
 			    	</group>
 			    	<group>
-			    	<field name="date_from"/>
-			    	<field name="date_to"/>
+			    	<field name="date_from1" required = "1" />
+			    	<field name="date_to1" required = "1"/>
 			    	</group>
 			    </group>
-			    <p>Adjust your daily attendance, select date range to dipaly your attendance based on your sign.</p>
 			    <notebook>
 			    <page string ="Attendance">
 			    <field name="attendancelines_ids"/>
 			    </page>
 			    </notebook>
-		</form>
 		</sheet>
+		</form>
+		
 		</field>
 	</record>
 
