@@ -1,6 +1,9 @@
 from openerp.osv import fields, osv
 import datetime
 import logging
+from datetime import date,  timedelta
+from openerp.tools import ustr, DEFAULT_SERVER_DATE_FORMAT as DF
+
 import math
 
 _logger = logging.getLogger(__name__)
@@ -903,10 +906,39 @@ class hr_timesheet_sheet(osv.osv):
     _inherit = "hr_timesheet_sheet.sheet"
     _description="Timesheet"
     
+    def adjust_attendance(self, cr, uid, ids,context):
+        """it adjusts employee attendance from attendance sign in and sign out"""
+        ctx = {}
+        sheet_rec = self.browse(cr,uid,ids)
+        if not context:
+            print "contect not exists"
+            ctx = {
+            'name':sheet_rec.employee_id.id,
+            }
+        else:
+            print "contect exists"
+            ctx = context
+            ctx['name'] = sheet_rec.employee_id.id
+        
+        result = {
+        'type': 'ir.actions.act_window',
+        'name': 'Adjust Attendance',
+        'res_model': 'adjust.attendance.hours',
+        'view_type': 'form',
+        'view_mode': 'form',
+        'view_id': False,
+        'nodestroy': True,
+        'target': 'current',
+        'context': ctx,
+        }
+        return result
+    
+    
+    
+    
     def onchange_date(self, cr, uid, ids, this_date,choice):
         """it received from amd to date from timesheet"""
         print "this date",this_date
-        print "today", datetime.date.today()
         vals = {}
         if choice == 'compare_date_from':
             if this_date:
@@ -917,7 +949,7 @@ class hr_timesheet_sheet(osv.osv):
                 vals['date_to'] = None
         return {'value':vals}
     
-    _columns = {}
+    _columns = {'over_time': fields.float('Overtime', readonly = True),}
     _defaults = {
         'date_from' : '',
         'date_to' : '',
@@ -926,3 +958,85 @@ class hr_timesheet_sheet(osv.osv):
 hr_timesheet_sheet()
   #-------------------------------------------------------------------------------------------------------------------------
   
+class adjust_attendance_hours(osv.osv):
+    
+    def _get_emp_id(self, cr, uid, context={}):
+        if context:
+            if 'name' in context:
+                return context['name']
+        else:
+            return None
+        
+    def load_attendance(self, cr, uid, ids, context=None):
+        
+        
+        
+        for f in self.browse(cr, uid, ids, context):
+            reconcile = False
+
+            date1 = datetime.datetime.strptime(f.date_from, DF).date()
+            date2 = datetime.datetime.strptime(f.date_to, DF).date()
+            day = timedelta(days=1)
+
+            
+            while date1 <= date2:
+                
+                attendance_ids = self.pool.get('hr.attendance').search(cr, uid, [('employee_id','=',f.name.id)])
+
+                if attendance_ids:     
+                    rec_att = self.pool.get('hr.attendance').browse(cr, uid, attendance_ids)
+                    daily_hours = 0
+                    for att in rec_att:
+                        daily_hours = daily_hours + att.worked_hours
+                        
+                    create = self.pool.get('attendance.adjustment.lines').create(cr, uid, {
+                           'date': date1.strftime("%Y-%m-%d"),
+                           'regular_hours': daily_hours,
+                           'reconcile':reconcile,
+                           'name':f.id
+                           }) 
+                date1 = date1 + day
+                
+        self.write(cr, uid, f.id, {'state':'Calculated'})
+        return
+
+    
+    _name = "adjust.attendance.hours"
+    _columns = {
+        'name': fields.many2one('hr.employee','Employee',readonly = True),
+        'date_from':fields.date('From',required = True),
+        'date_to':fields.date('To',required = True),
+        'total_regular_hrs':fields.float('Regular'),
+        'total_overtime_hrs':fields.float('Over Time'),
+        'grand_total':fields.float('Total'),
+        'attendancelines_ids':fields.one2many('attendance.adjustment.lines','name','Lines'),
+        'state':fields.selection([('Draft','Draft'),('Calculated','Calculated'),('Adjusted','Adjusted')],'State')
+    }
+    _defaults = {
+         'state': 'Draft',
+         'name':_get_emp_id ,
+    }
+    
+adjust_attendance_hours()
+
+
+class attendance_adjustment_lines(osv.osv):
+    
+    
+    _name = "attendance.adjustment.lines"
+    _columns = {
+        'name': fields.many2one('adjust.attendance.hours','Parent Attendance'),
+        'date':fields.date('Date'),
+        'regular_hours':fields.float('Regular'),
+        'over_time':fields.float('Over Time'),
+        'over_time_adjustemnt':fields.selection([('Paid','Paid'),('Bank','Bank'),('Absent','Paid Absent')],'OT Adjustment'),
+        'reconcile':fields.boolean('reconcile')
+    }
+    
+attendance_adjustment_lines()
+
+
+
+
+
+

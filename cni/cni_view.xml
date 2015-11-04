@@ -630,12 +630,67 @@
                    <field name="date_to"  position = "replace"/>
 				    <group >
 				   <group >
+				   
 				   <field name="date_from" required = "1" on_change="onchange_date(date_from,'compare_date_from')" />
                    <field name="date_to" required = "1" on_change="onchange_date(date_from,'compare_date_to')" />
 				   </group>
+				   <button name="adjust_attendance" string="Adjust Attendance" type="object" class="oe_highlight" groups="base.group_user"/>
 				   </group>
 			  	</data>
 			  </field>	
+		</record>
+
+	<!--Hr Attendance Adjustment -->
+	<record id="attendance_hrs_adjustment_view" model="ir.ui.view">
+		<field name="name">adjust.attendance.hours.form</field>
+		<field name="model">adjust.attendance.hours</field>
+		<field name="arch" type="xml">
+			<sheet>
+			<header>
+	           <button name="load_attendance" string="Show My Attendance" states="Draft"  type="object" class="oe_highlight" groups="base.group_user"/>
+	           <field  name="state" widget="statusbar" statusbar_visible=",Draft,Waiting,Close,Cancel" statusbar_colors='{"Cancel":"red"}' readonly="1"/>
+	    	</header>
+			<form string="Tasks in Project">
+			
+			    <group>
+			    	<group>
+			   		<field name="name"/>
+			    	</group>
+			    	<group>
+			    	<field name="date_from"/>
+			    	<field name="date_to"/>
+			    	</group>
+			    </group>
+			    <p>Adjust your daily attendance, select date range to dipaly your attendance based on your sign.</p>
+			    <notebook>
+			    <page string ="Attendance">
+			    <field name="attendancelines_ids"/>
+			    </page>
+			    </notebook>
+		</form>
+		</sheet>
+		</field>
+	</record>
+
+	<record id="action_hr_attendance_adjustment" model="ir.actions.act_window">
+	    <field name="name">Attendance Adjustment</field>
+	    <field name="res_model">adjust.attendance.hours</field>
+	    <field name="view_type">form</field>
+		<field name="view_mode">tree,form</field>
+	</record>
+	
+	<record id="att_adjustmentlines_tree" model="ir.ui.view">
+			<field name="name">attendance.adjustment.lines.tree</field>
+		    <field name="model">attendance.adjustment.lines</field>
+		    <field name="arch" type="xml">
+		    <tree editable = "top" string="Attendance Adjustment">
+		        <field name="name" invisible = "1"/>
+		        <field name="date" readonly = "1"/>
+				<field name="regular_hours" readonly = "1" />
+				<field name="over_time" readonly = "1"/>
+				<field name="over_time_adjustemnt"/>
+		    </tree>
+		    </field>
 		</record>
 
 </data>
