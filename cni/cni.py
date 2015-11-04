@@ -972,8 +972,8 @@ class adjust_attendance_hours(osv.osv):
         for f in self.browse(cr, uid, ids, context):
             reconcile = False
 
-            date1 = datetime.datetime.strptime(f.date_from, DF).date()
-            date2 = datetime.datetime.strptime(f.date_to, DF).date()
+            date1 = datetime.datetime.strptime(f.date_from1, DF).date()
+            date2 = datetime.datetime.strptime(f.date_to1, DF).date()
             day = timedelta(days=1)
 
             

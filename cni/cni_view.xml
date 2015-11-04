@@ -645,12 +645,10 @@
 		<field name="name">adjust.attendance.hours.form</field>
 		<field name="model">adjust.attendance.hours</field>
 		<field name="arch" type="xml">
-			
-			
 			<form string="Tasks in Project">
 			<header>
 	           <button name="load_attendance" string="Show My Attendance" states="Draft"  type="object" class="oe_highlight" groups="base.group_user"/>
-	           <field  name="state" widget="statusbar" statusbar_visible=",Draft,Calculated,Adjusted" statusbar_colors='{"Cancel":"red"}' readonly="1"/>
+	           <field  name="state" widget="statusbar" statusbar_visible="Draft,Calculated,Adjusted" statusbar_colors='{"Cancel":"red"}' readonly="1"/>
 	    	</header>
 	    	<sheet>
 			    <group>
