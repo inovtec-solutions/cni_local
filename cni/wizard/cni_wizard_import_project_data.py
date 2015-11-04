@@ -75,6 +75,7 @@ class cni_import_project_data(osv.osv_memory):
                     #_logger.info("_______________IF Project____________%r", project_id_excel)
             
                 else:
+                    
                     res_partner = self.pool.get('res.partner').search(cr, uid, [('name','=','Bell')])
                     if res_partner:
                         res_partner = res_partner[0]
@@ -103,9 +104,10 @@ class cni_import_project_data(osv.osv_memory):
                         'status': status,
                         'actv_desc': actv_desc,
                         'wbs': wbs,}, context=context)            
-
+                    
                 material_desc = str(worksheet.cell_value(row, 22))
                 material_desc = material_desc.strip()
+                
                 
                 activity_description =  str(worksheet.cell_value(row, 6))
                 activity_description = activity_description.strip()
@@ -157,11 +159,12 @@ class cni_import_project_data(osv.osv_memory):
                             ('activity_description','=',activity_description),('item','=',item),('gr_doc_pa','=',gr_doc_pa)])
                     
                 if material_exist:
-                    material_unchanged_exist = self.pool.get('project.material').search(cr, uid, [('network_id','=',network),('plant','=',plant),
-                            ('activity_description','=',activity_description),('item','=',item),('gr_doc_pa','=',gr_doc_pa),
-                            ('material_req_date','=',material_req_date),('req_quantiity','=',worksheet.cell_value(row,37)),
-                            ('shiping_date','=',shiping_date),('delivery_pa','=', worksheet.cell_value(row,63)),('gi_date','=',gi_date),
-                            ('po_pa','=',worksheet.cell_value(row,70)),('pa_gi_doc','=',pa_gi_doc)])
+                    material_unchanged_exist = self.pool.get('project.material').search(cr, uid, [('network_id','=',network),
+                            ('plant','=',plant),('delivery_date','=',delivery_date),('activity_description','=',activity_description),
+                            ('item','=',item),('gr_doc_pa','=',gr_doc_pa),('material_req_date','=',material_req_date),
+                            ('mat_desc','=',material_desc),('req_quantiity','=',worksheet.cell_value(row,37)),
+                            ('shiping_date','=',shiping_date),('delivery_pa','=', delivery_pa),('gi_date','=',gi_date),
+                            ('po_pa','=',po_pa),('pa_gi_doc','=',pa_gi_doc)])
                     
                     if not material_unchanged_exist:
                         material_id = material_exist[0]
@@ -179,11 +182,10 @@ class cni_import_project_data(osv.osv_memory):
                     self.pool.get('project.material').create(cr, uid, {
                         'name': project_id,
                         'network_id': network,
-                        'item': item,
-                        'activity_description': activity_description,
                         'plant': plant,
                         'delivery_date': delivery_date,
-                        'pa_gi_doc': pa_gi_doc,
+                        'activity_description': activity_description,
+                        'item': item,
                         'gr_doc_pa': gr_doc_pa,
                         'material_req_date': material_req_date,
                         'mat_desc': material_desc,
@@ -191,7 +193,8 @@ class cni_import_project_data(osv.osv_memory):
                         'shiping_date': shiping_date,
                         'delivery_pa': delivery_pa,
                         'gi_date': gi_date,
-                        'po_pa': po_pa}, context=context)            
+                        'po_pa': po_pa,
+                        'pa_gi_doc': pa_gi_doc}, context=context)            
 
             row += 1
         
