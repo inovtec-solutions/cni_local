@@ -949,13 +949,18 @@ class hr_timesheet_sheet(osv.osv):
     def onchange_date(self, cr, uid, ids, this_date,choice):
         """it received from amd to date from timesheet"""
         print "this date",this_date
+        _logger.info("==============date from time today================ : %r",time.strftime("%x"))
+        _logger.info("=============selected date=============== : %r",this_date)
         vals = {}
+        today = time.strftime("%x")
+        date_today = datetime.strptime(str(today), '%m/%d/%Y').strftime('%Y-%m-%d') 
+        _logger.info("===========today formated============= : %r",date_today)
         if choice == 'compare_date_from':
             if this_date:
-                if str(this_date) > str(time.strftime("%x")):
+                if str(this_date) > date_today:
                     vals['date_from'] = None
         elif choice == 'compare_date_to':
-            if str(this_date) > str(time.strftime("%x")):
+            if str(this_date) > date_today:
                 vals['date_to'] = None
         return {'value':vals}
     

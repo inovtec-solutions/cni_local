@@ -337,18 +337,7 @@
 
 
 
- <record id="view_task_work_tree_inherit" model="ir.ui.view">
-            <field name="name">project.task.work.tree.inherit</field>
-            <field name="model">project.task.work</field>
-            <field name="inherit_id" ref="project.view_task_work_tree"/>
-            <field name="arch" type="xml">
-                <field name="hours" position="after">
-                    <field name="activity_time" readonly = "1" widget="float_time"/>
-                </field>
-            </field>
-        </record>
-
-
+ 
 <!--Client stock provision-->
 
 	<record id="client_stock_provide_form" model="ir.ui.view">
