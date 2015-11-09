@@ -342,7 +342,7 @@
             <field name="model">project.task.work</field>
             <field name="inherit_id" ref="project.view_task_work_tree"/>
             <field name="arch" type="xml">
-                <field name="hours" position="before">
+                <field name="hours" position="after">
                     <field name="activity_time" readonly = "1" widget="float_time"/>
                 </field>
             </field>
