@@ -1,7 +1,7 @@
 from openerp.osv import fields, osv
 import datetime
 import logging
-from datetime import date,  timedelta
+from datetime import date, datetime, timedelta
 from openerp.tools import ustr, DEFAULT_SERVER_DATE_FORMAT as DF
 
 import math
@@ -972,30 +972,57 @@ class adjust_attendance_hours(osv.osv):
         for f in self.browse(cr, uid, ids, context):
             reconcile = False
 
-            date1 = datetime.datetime.strptime(f.date_from1, DF).date()
-            date2 = datetime.datetime.strptime(f.date_to1, DF).date()
-            day = timedelta(days=1)
-
+#            date1 = datetime.datetime.strptime(f.date_from1, DF).date()
+#            date2 = datetime.datetime.strptime(f.date_to1, DF).date()
+#            day = timedelta(days=1)
+#            print "++++++++++++++++++", date1
             
-            while date1 <= date2:
+            
+            date_from_str = str(f.date_from1) + " 0:0:0"
+            new_date_1 = datetime.strptime(date_from_str, "%Y-%m-%d %H:%M:%S")
+            new_date_str1 = new_date_1.strftime("%Y-%m-%d %H:%M:%S")
+           
+            date_to_str = str(f.date_to1) + " 0:0:0"
+            new_date_2 = datetime.strptime(date_to_str, "%Y-%m-%d %H:%M:%S")
+            new_date_2 = new_date_2 + timedelta(days=1)
+            new_date_str2 = new_date_2.strftime("%Y-%m-%d %H:%M:%S")
+           
+            #attendance_ids = self.pool.get('hr.attendance').search(cr, uid, [('name','>=',new_date_str1),('name','<=',new_date_str2)])
+            #attendance_objs = self.pool.get('hr.attendance').browse(cr, uid, attendance_ids, context=context)
+            #for attendance_obj in attendance_objs:
+            #    _logger.info("_______ %r Attendance _______________", attendance_obj.name)
+            
+            
+            
+            attendance_ids = self.pool.get('hr.attendance').search(cr, uid, [('employee_id','=',f.name.id),('name','>=',new_date_str1),('name','<=',new_date_str2)])
+            attendance_objs = self.pool.get('hr.attendance').browse(cr, uid, attendance_ids, context=context)
+            _logger.info("=========================================== : %r", attendance_objs)
                 
-                attendance_ids = self.pool.get('hr.attendance').search(cr, uid, [('employee_id','=',f.name.id)])
-
-                if attendance_ids:     
-                    rec_att = self.pool.get('hr.attendance').browse(cr, uid, attendance_ids)
-                    daily_hours = 0
-                    for att in rec_att:
-                        daily_hours = daily_hours + att.worked_hours
-                        
-                    create = self.pool.get('attendance.adjustment.lines').create(cr, uid, {
-                           'date': date1.strftime("%Y-%m-%d"),
-                           'regular_hours': daily_hours,
-                           'reconcile':reconcile,
-                           'name':f.id
-                           }) 
-                date1 = date1 + day
+            for attendance_obj in attendance_objs:
+                _logger.info("=========================================== : %r", attendance_obj.name)
                 
-        self.write(cr, uid, f.id, {'state':'Calculated'})
+                new_date = datetime.strptime(str(attendance_obj.name), "%Y-%m-%d %H:%M:%S")
+                new_date_str = new_date_2.strftime("%Y-%m-%d")
+              
+                
+                rec_att = self.pool.get('hr.attendance').browse(cr, uid, attendance_ids)
+                daily_hours = 0
+                for att in rec_att:
+                    daily_hours = daily_hours + att.worked_hours
+                
+                over_time = 0
+                if daily_hours > 8:
+                    over_time = daily_hours - 8
+                
+                create = self.pool.get('attendance.adjustment.lines').create(cr, uid, {
+                       'date': new_date_str,
+                       'regular_hours': daily_hours,
+                       'reconcile':reconcile,
+                       'over_time':over_time,
+                       'name':f.id
+                       }) 
+                
+        #self.write(cr, uid, f.id, {'state':'Calculated'})
         return
 
     
