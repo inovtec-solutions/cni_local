@@ -1,5 +1,6 @@
 from openerp.osv import fields, osv
 import datetime
+import time
 import logging
 from datetime import date, datetime, timedelta
 from openerp.tools import ustr, DEFAULT_SERVER_DATE_FORMAT as DF
@@ -500,8 +501,10 @@ class project_project(osv.osv):
         rec_project_template = self.pool.get('project.generic.template').browse(cr, uid,project_gen_type)
         
         default_task_id = self.pool.get('project.tasks.default').search(cr, uid, [('project_template_id','=',project_gen_type)])
+        project_hours = 0
         if default_task_id:
             rec_default_task = self.pool.get('project.tasks.default').browse(cr, uid,default_task_id)
+           
             for d_task in rec_default_task:
                 #now create task record in project.task
                 task_id = self.pool.get('project.task').create(cr,uid,{
@@ -510,6 +513,7 @@ class project_project(osv.osv):
                                             'planned_hours':d_task.planned_hours,
                                             'user_id':rec_project_template.default_users.id
                                              })
+                project_hours = project_hours + d_task.planned_hours
                 if task_id:
                     #search default_work activities of task using default task id
                     activity_ids = self.pool.get('project.task.work.default').search(cr, uid, [('task_id','=',d_task.id)])
@@ -521,22 +525,27 @@ class project_project(osv.osv):
                                             'name':activity.name,
                                             'task_id':task_id, 
                                             'user_id':rec_project_template.default_users.id,
-                                            'hours':activity.hours
+                                            'activity_time':activity.hours,
+                                            'hours':0
                                              })
-        return
+        return  project_hours 
    
     def create(self, cr, uid, vals, context=None, check=False):
         
         result = super(project_project, self).create(cr, uid, vals, context)
         
         for f in self.browse(cr,uid,result):
-            vals['template_loaded'] = True
-            load = self.load_tasks_and_activities(cr,uid,f.id,f.project_type_template.id)
+            if 'project_type_template' in vals:
+                if vals['project_type_template']:
+                    project_hours = self.load_tasks_and_activities(cr,uid,f.id,f.project_type_template.id)
+                    vals['template_loaded'] = True
+
         return result
    
     def write(self, cr, uid, ids, vals, context=None, check=True, update_check=True):
         for f in self.browse(cr,uid,ids):
             if 'project_type_template' in vals:
+                if vals['project_type_template']:
                     self.load_tasks_and_activities(cr,uid,f.id,vals['project_type_template'])
                     vals['template_loaded'] = True
         result = super(project_project, self).write(cr, uid, ids, vals, context)
@@ -731,6 +740,7 @@ class project_work(osv.osv):
     _inherit ='project.task.work'
     _columns = {
         'name': fields.char('Task Summary'),
+        'activity_time': fields.char('Activity Time'),
         'restrict_access':fields.function(is_access_restricted, method=True,  size=256, string='Restrict Access',type='boolean'),
             }
 
@@ -942,10 +952,10 @@ class hr_timesheet_sheet(osv.osv):
         vals = {}
         if choice == 'compare_date_from':
             if this_date:
-                if str(this_date) > str(datetime.date.today()):
+                if str(this_date) > str(time.strftime("%x")):
                     vals['date_from'] = None
         elif choice == 'compare_date_to':
-            if str(this_date) > str(datetime.date.today()):
+            if str(this_date) > str(time.strftime("%x")):
                 vals['date_to'] = None
         return {'value':vals}
     
@@ -1028,7 +1038,7 @@ class adjust_attendance_hours(osv.osv):
     
     _name = "adjust.attendance.hours"
     _columns = {
-        'name': fields.many2one('hr.employee','Employee'),
+        'name': fields.many2one('hr.employee','Employee',readonly = True),
         'date_from1':fields.date('From'),
         'date_to1':fields.date('To'),
         'total_regular_hrs':fields.float('Regular'),

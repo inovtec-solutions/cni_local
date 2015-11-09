@@ -322,7 +322,7 @@
 <!--Project Task Activities-->
 
 <!--task work-->
-<record id="project_task_activity_tree" model="ir.ui.view">
+<record id="project_task_activity_tree_default" model="ir.ui.view">
 		<field name="name">project.task.work.default.tree</field>
 	    <field name="model">project.task.work.default</field>
 	    <field name="arch" type="xml">
@@ -334,6 +334,20 @@
 	    </tree>
 	    </field>
 	</record>
+
+
+
+ <record id="view_task_work_tree_inherit" model="ir.ui.view">
+            <field name="name">project.task.work.tree.inherit</field>
+            <field name="model">project.task.work</field>
+            <field name="inherit_id" ref="project.view_task_work_tree"/>
+            <field name="arch" type="xml">
+                <field name="hours" position="before">
+                    <field name="activity_time" readonly = "1" widget="float_time"/>
+                </field>
+            </field>
+        </record>
+
 
 <!--Client stock provision-->
 
