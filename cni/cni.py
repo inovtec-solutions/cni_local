@@ -19,7 +19,7 @@ class product_template(osv.osv):
 product_template()   
     
 class asset_requisition(osv.osv):
-    """"Asset requisition or tools requistion are the same things"""
+    """"Asset requisition or tools requisition are the same things"""
     
     def write(self, cr, uid, ids, vals, context=None, check=True, update_check=True):
         result = super(osv.osv, self).write(cr, uid, ids, vals, context)
